@@ -1,0 +1,141 @@
+﻿@model UoCourseInstanceModel
+@{
+    ViewData["ViewName"] = "Course Instance";
+    ViewData["Title"] = @Model.Course.GetCourseCode() + " (" + Model.Year + " " + @Model.GetTerm() + ")";
+}
+
+<style>
+    .outcomes[open] > summary {
+        /* text-indigo-900 */
+        color: #362f78;
+        color: rgba(54, 47, 120, 1);
+    }
+
+    .outcomes[open] > summary > span {
+        display: none;
+    }
+
+    .outcomes[open] > summary::after {
+        content: "Hide learning outcomes";
+    }
+
+    .documents[open] > summary {
+        /* text-indigo-900 */
+        color: #362f78;
+        color: rgba(54, 47, 120, 1);
+    }
+
+    .documents[open] > summary > span {
+        display: none;
+    }
+
+    .documents[open] > summary::after {
+        content: "Hide documents";
+    }
+</style>
+<section class="py-4">
+    <div class="bg-white overflow-hidden shadow sm:rounded-lg">
+        <div class="px-4 pt-5 pb-4 border-b border-gray-200 sm:px-6">
+            <h2 class="text-lg leading-6 font-medium text-gray-900">
+                @Model.Course.GetCourseCode()
+            </h2>
+            <p class="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
+                @Model.Course.Name
+            </p>
+            @if ((bool)ViewData["IsStatic"])
+            {
+                <a class="inline-block mt-2 select-none underline font-medium text-sm leading-5 text-indigo-600 hover:text-indigo-900" href="course-@(Model.Course.CourseId).aspx">
+                    Return to course
+                </a>
+            }
+            else
+            {
+                <a class="inline-block mt-2 select-none underline font-medium text-sm leading-5 text-indigo-600 hover:text-indigo-900"
+                   asp-controller="UoCourse" asp-action="GetView" asp-route-id="@Model.Course.CourseId" asp-route-projectId="@ViewData["ProjectId"]" asp-route-template="@ViewData["Template"]">
+                    Return to course
+                </a>
+            }
+        </div>
+        <div class="px-4 py-5 sm:px-6">
+            <div class="grid grid-cols-1 col-gap-4 row-gap-8 sm:grid-cols-3">
+                <dl class="sm:col-span-1 pb-3 sm:pb-0">
+                    <dt class="text-sm leading-5 font-medium text-gray-500">
+                        Year
+                    </dt>
+                    <dd class="mt-1 text-sm leading-5 text-gray-900">
+                        @Model.Year
+                    </dd>
+                </dl>
+                <dl class="sm:col-span-1 pb-3 sm:pb-0">
+                    <dt class="text-sm leading-5 font-medium text-gray-500">
+                        Term
+                    </dt>
+                    <dd class="mt-1 text-sm leading-5 text-gray-900">
+                        @Model.GetTerm()
+                    </dd>
+                </dl>
+                <dl class="sm:col-span-1">
+                    <dt class="text-sm leading-5 font-medium text-gray-500">
+                        Campus
+                    </dt>
+                    <dd class="mt-1 text-sm leading-5 text-gray-900">
+                        @Model.Campus.Name
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</section>
+@if (Model.Documents.Count > 0)
+{
+    ViewData["DocumentTypes"] = new List<UoDocumentType>()
+    {
+        UoDocumentType.CourseOutline,
+        UoDocumentType.CourseDetailReport
+    };
+    <section class="py-4">
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+                <h2 class="text-lg font-semibold text-gray-900">Documents</h2>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                <partial name="_Documents" model="Model.Documents" view-data="ViewData" />
+            </div>
+        </div>
+    </section>
+}
+@if (Model.Assessments.Count > 0)
+{
+    <section class="py-4">
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+                <h2 class="text-lg font-semibold text-gray-900">Assessments</h2>
+            </div>
+            <div class="px-4 py-5 sm:p-6 -mb-4">
+                @foreach (var assessment in Model.Assessments.OrderBy(a => a.Position))
+                {
+                    <partial name="_Assessment" model="assessment" />
+                }
+            </div>
+        </div>
+    </section>
+}
+@if (Model.LearningOutcomes.Count > 0)
+{
+    <section class="py-4">
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+                <h2 class="text-lg font-semibold text-gray-900">Learning Outcomes</h2>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                <p class="text-sm text-gray-500">On successful completion of the course students will be able to:</p>
+                <ol class="mt-1 ml-4 text-sm leading-5 text-gray-900">
+                    @foreach (var learningOutcome in Model.LearningOutcomes.OrderBy(lo => lo.Position))
+                    {
+                        <li><span class="inline-block w-6 text-gray-500">@learningOutcome.Position.</span>@learningOutcome.Name</li>
+                    }
+                </ol>
+            </div>
+        </div>
+    </section>
+}

@@ -1,0 +1,189 @@
+﻿@model UoProgramModel
+@{
+    ViewData["ViewName"] = "Program";
+    ViewData["Title"] = @Model.Name;
+}
+
+<section class="py-4">
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+            <h2 class="text-lg font-semibold text-gray-900">@Model.Name</h2>
+        </div>
+        <div class="px-4 py-5 sm:p-6">
+            <div class="grid grid-cols-1 col-gap-4 row-gap-8 sm:grid-cols-2 -mb-3">
+                <dl class="sm:col-span-1 pb-3">
+                    <dt class="text-sm leading-5 font-medium text-gray-500">
+                        Program code
+                    </dt>
+                    <dd class="mt-1 text-sm leading-5 text-gray-900">
+                        @Model.ProgramCode
+                    </dd>
+                </dl>
+                <dl class="sm:col-span-1 pb-3">
+                    <dt class="text-sm leading-5 font-medium text-gray-500">
+                        Career
+                    </dt>
+                    <dd class="mt-1 text-sm leading-5 text-gray-900">
+                        @Model.ProgramCareer.Name
+                    </dd>
+                </dl>
+                <dl class="sm:col-span-1 pb-3">
+                    <dt class="text-sm leading-5 font-medium text-gray-500">
+                        Campus
+                    </dt>
+                    <dd class="mt-1 text-sm leading-5 text-gray-900">
+                        @Model.Campus.Name
+                    </dd>
+                </dl>
+                @if (Model.FirstTermCode != null)
+                {
+                    <dl class="sm:col-span-1 pb-3">
+                        <dt class="text-sm leading-5 font-medium text-gray-500">
+                            Start term
+                        </dt>
+                        <dd class="mt-1 text-sm leading-5 text-gray-900">
+                            @Model.GetFirstYear() @Model.GetFirstTerm()
+                        </dd>
+                    </dl>
+                }
+                @if (Model.MinUnits != null)
+                {
+                    <dl class="sm:col-span-1 pb-3">
+                        <dt class="text-sm leading-5 font-medium text-gray-500">
+                            Minimum units
+                        </dt>
+                        <dd class="mt-1 text-sm leading-5 text-gray-900">
+                            @Model.MinUnits
+                        </dd>
+                    </dl>
+                }
+                @if (Model.MaxYears != null)
+                {
+                    <dl class="sm:col-span-1 pb-3">
+                        <dt class="text-sm leading-5 font-medium text-gray-500">
+                            Maximum duration
+                        </dt>
+                        <dd class="mt-1 text-sm leading-5 text-gray-900">
+                            @Model.MaxYears years
+                        </dd>
+                    </dl>
+                }
+                @if (Model.FieldOfEducation != null)
+                {
+                    <dl class="sm:col-span-1 pb-3">
+                        <dt class="text-sm leading-5 font-medium text-gray-500">
+                            Field of Education
+                        </dt>
+                        <dd class="mt-1 text-sm leading-5 text-gray-900">
+                            @Model.FieldOfEducation.Name
+                        </dd>
+                    </dl>
+                }
+                @if (Model.CRICOSCode != null)
+                {
+                    <dl class="sm:col-span-1 pb-3">
+                        <dt class="text-sm leading-5 font-medium text-gray-500">
+                            CRICOS code
+                        </dt>
+                        <dd class="mt-1 text-sm leading-5 text-gray-900">
+                            @Model.CRICOSCode
+                        </dd>
+                    </dl>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+@if (Model.Documents.Count > 0)
+{
+    ViewData["DocumentTypes"] = new List<UoDocumentType>()
+    {
+        UoDocumentType.Documentation
+    };
+    <section class="py-4">
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+                <h2 class="text-lg font-semibold text-gray-900">Documents</h2>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                <partial name="_Documents" model="Model.Documents" view-data="ViewData" />
+            </div>
+        </div>
+    </section>
+}
+@if (Model.ProgramStructure.Count > 0)
+{
+    <section class="py-4">
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+                <h2 class="text-lg font-semibold text-gray-900">Program Structure</h2>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                @{
+                    var orderedStructure = Model.ProgramStructure.OrderBy(cL => cL.Position).ToList();
+                    for (int ix1 = 0; ix1 < orderedStructure.Count; ix1++)
+                    {
+                        <div class="@(ix1 != orderedStructure.Count - 1 ? "pb-5" : "")">
+                            <partial name="_CourseList" model="orderedStructure[ix1]" />
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </section>
+}
+@if (Model.NodePrograms.Count > 0 || Model.LevelPrograms.Count > 0)
+{
+    <section class="py-4">
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+                <h2 class="text-lg font-semibold text-gray-900">Mapping</h2>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                @if (Model.NodePrograms.Count > 0)
+                {
+                    try
+                    {
+                        <partial name="Templates/@ViewData["Template"]/_ProgramNodes" model="Model.Nodes" />
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        <partial name="Templates/Universal/_ProgramNodes" model="Model.Nodes" />
+                    }
+                }
+                @if (Model.LevelPrograms.Count > 0)
+                {
+                    <div class="@(Model.NodePrograms.Count > 0 ? "mt-4" : "")">
+                        @try
+                        {
+                            <partial name="Templates/@ViewData["Template"]/_ProgramNodeLevels" model="Model.NodeLevels" />
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            <partial name="Templates/Universal/_ProgramNodeLevels" model="Model.NodeLevels" />
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+@if (Model.LearningOutcomes.Count > 0)
+{
+    <section class="py-4">
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+                <h2 class="text-lg font-semibold text-gray-900">Learning Outcomes</h2>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                <p class="text-sm text-gray-500">On successful completion of the program students will have:</p>
+                <ol class="mt-1 ml-4 text-sm leading-5 text-gray-900">
+                    @foreach (var learningOutcome in Model.LearningOutcomes.OrderBy(lo => lo.Position))
+                    {
+                        <li><span class="inline-block w-6 text-gray-500">@learningOutcome.Position.</span>@learningOutcome.Name</li>
+                    }
+                </ol>
+            </div>
+        </div>
+    </section>
+}

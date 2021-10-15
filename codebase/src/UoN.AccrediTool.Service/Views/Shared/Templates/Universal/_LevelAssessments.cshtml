@@ -1,0 +1,103 @@
+﻿@model List<UoLevelAssessmentsJoin>
+
+<h2 class="text-base leading-6 font-medium text-gray-900 mb-2">Levelled Mapping</h2>
+@{
+    var courses = Model.GroupBy(join => join.Assessment.CourseInstance.CourseId).Select(join => join.First()).Select(join => join.Assessment.CourseInstance.Course).ToList();
+    for (int ix1 = 0; ix1 < courses.Count; ix1++)
+    {
+        var course = courses.ElementAt(ix1);
+        <div class="border border-gray-200 rounded-md py-3 px-3@(ix1 != courses.Count - 1 ? " mb-4" : "")">
+            <div class="grid grid-cols-1 col-gap-4 row-gap-8 sm:grid-cols-2">
+                <dl class="sm:col-span-1 pb-3">
+                    <dt class="text-sm leading-5 font-medium text-gray-500">
+                        Course Code
+                    </dt>
+                    <dd class="mt-1 text-sm leading-5 text-gray-900">
+                        @course.GetCourseCode()
+                    </dd>
+                </dl>
+                <dl class="sm:col-span-1 pb-3">
+                    <dt class="text-sm leading-5 font-medium text-gray-500">
+                        Name
+                    </dt>
+                    <dd class="mt-1 text-sm leading-5 text-gray-900">
+                        @course.Name
+                    </dd>
+                </dl>
+                <div class="sm:col-span-2 pb-3">
+                    @if ((bool)ViewData["IsStatic"])
+                    {
+                        <a class="select-none underline font-medium text-sm text-indigo-600 hover:text-indigo-900" href="course-@(course.CourseId).aspx">
+                            View course
+                        </a>
+                    }
+                    else
+                    {
+                        <a class="select-none underline font-medium text-sm text-indigo-600 hover:text-indigo-900"
+                           asp-controller="UoCourse" asp-action="GetView" asp-route-id="@course.CourseId" asp-route-projectId="@ViewData["ProjectId"]" asp-route-template="@ViewData["Template"]">
+                            View course
+                        </a>
+                    }
+                </div>
+                <dl class="sm:col-span-2 pb-2">
+                    <dt class="text-sm leading-5 font-medium text-gray-500">
+                        Mapped Assessments
+                    </dt>
+                    <dd class="mt-2">
+                        <div class="flex flex-col">
+                            <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                                <div class="pt-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+                                    <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+                                        <table class="min-w-full divide-y divide-gray-200">
+                                            <thead>
+                                                <tr>
+                                                    <th class="w-2/12 px-3 sm:px-6 py-3 bg-gray-50 whitespace-no-wrap text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                                        Number
+                                                    </th>
+                                                    <th class="w-4/12 px-3 sm:px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                                        Name
+                                                    </th>
+                                                    <th class="hidden md:table-cell w-3/12 px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                                        Term
+                                                    </th>
+                                                    <th class="w-3/12 px-3 sm:px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                                        Level
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white divide-y divide-gray-200">
+                                                @{
+                                                    var levelAssessments = Model
+                                                        .Where(join => join.Assessment.CourseInstance.CourseId == course.CourseId)
+                                                        .OrderBy(join => join.Assessment.CourseInstance.TermCode)
+                                                        .ThenBy(join => join.Assessment.Position);
+                                                    foreach (var join in levelAssessments)
+                                                    {
+                                                        <tr>
+                                                            <td class="px-3 sm:px-6 py-4 whitespace-no-wrap text-center text-sm leading-5 font-medium text-gray-900">
+                                                                @join.Assessment.Position
+                                                            </td>
+                                                            <td class="px-3 sm:px-6 py-4 text-sm leading-5 text-gray-500">
+                                                                @join.Assessment.Name
+                                                            </td>
+                                                            <td class="hidden md:table-cell px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                                                                @join.Assessment.CourseInstance.Year @join.Assessment.CourseInstance.GetTerm()
+                                                            </td>
+                                                            <td class="px-3 sm:px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                                                                @join.Level.Name
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    }
+}

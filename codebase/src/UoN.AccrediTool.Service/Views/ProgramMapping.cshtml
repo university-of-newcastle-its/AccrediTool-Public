@@ -1,0 +1,25 @@
+﻿@model UoProgramModel
+@{
+    ViewData["ViewName"] = "Mapping";
+    ViewData["Title"] = @Model.Name;
+}
+
+<section class="py-4">
+    <div class="bg-white overflow-hidden shadow sm:rounded-lg">
+        <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
+            <h2 class="flex text-lg leading-6 font-medium text-gray-900">
+                Mapping
+            </h2>
+        </div>
+        <div class="px-4 py-5 sm:px-6">
+            @try
+            {
+                <partial name="Templates/@ViewData["Template"]/_ProgramMapping" model="Model" />
+            }
+            catch (InvalidOperationException)
+            {
+                <partial name="Templates/Universal/_ProgramMapping" model="Model" />
+            }
+        </div>
+    </div>
+</section>

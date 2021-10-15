@@ -1,0 +1,6 @@
+﻿@model List<Dictionary<string, object>>
+
+@{
+    ViewData["IncludeNodeLink"] = true;
+    <partial name="Templates/Universal/_CourseNodeLevels" model="Model" view-data="ViewData" />
+}

@@ -1,0 +1,105 @@
+﻿@model List<Dictionary<string, object>>
+
+@{
+    var nodes = new Dictionary<int, UoNodeModel>();
+    var levels = new Dictionary<int, List<UoLevelModel>>();
+    foreach (var nodeLevel in Model)
+    {
+        object nodeOut;
+        object levelOut;
+        if (nodeLevel.TryGetValue("node", out nodeOut) && nodeLevel.TryGetValue("level", out levelOut))
+        {
+            if (nodeOut is UoNodeModel node && levelOut is UoLevelModel level)
+            {
+                if (nodes.ContainsKey(node.NodeId) && levels.ContainsKey(node.NodeId))
+                {
+                    levels[node.NodeId].Add(level);
+                }
+                else
+                {
+                    nodes.Add(node.NodeId, node);
+                    levels.Add(node.NodeId, new List<UoLevelModel>() { level });
+                }
+            }
+        }
+    }
+    var nodeList = nodes.ToList();
+    for (int ix1 = 0; ix1 < nodeList.Count; ix1++)
+    {
+        var nodeKP = nodeList.ElementAt(ix1);
+        var levelList = levels.GetValueOrDefault<int, List<UoLevelModel>>(nodeKP.Key);
+        var groupedLevels = new Dictionary<string, List<UoLevelModel>>();
+        foreach (var level in levelList)
+        {
+            string levelCategoryName = level.LevelCategory.Name;
+            if (groupedLevels.ContainsKey(levelCategoryName))
+            {
+                groupedLevels[levelCategoryName].Add(level);
+            }
+            else
+            {
+                groupedLevels.Add(levelCategoryName, new List<UoLevelModel>() { level });
+            }
+        }
+        var groupedLevelList = groupedLevels.ToList();
+        UoNodeModel node = nodeKP.Value;
+        <div class="@(ix1 != nodeList.Count - 1 ? "mb-4 " : "")border border-gray-200 rounded-md py-3 px-3">
+            <dl class="block sm:inline-block@(node.Description != null ? " sm:w-1/2" : "")">
+                <dt class="text-sm leading-5 font-medium text-gray-500">
+                    Name
+                </dt>
+                <dd class="flex items-center mt-1 text-sm leading-5 text-gray-900">
+                    @if (node.NodeCode != null)
+                    {
+                        <span class="inline-flex items-center px-2.5 py-0.5 mr-2 rounded-md font-semibold leading-5 tracking-wider bg-gray-100">@node.NodeCode</span>
+                    }
+                    <span>@node.Name</span>
+                </dd>
+            </dl>
+            @if (node.Description != null)
+            {
+                <dl class="block sm:inline-block sm:w-1/2">
+                    <dt class="text-sm leading-5 font-medium text-gray-500">
+                        Description
+                    </dt>
+                    <dd class="mt-1 text-sm leading-5 text-gray-900">
+                        @node.Description
+                    </dd>
+                </dl>
+            }
+            <p class="block mt-2 text-sm leading-5 font-medium text-gray-500">Mapped Level@(levelList.Count > 1 ? "s" : "")</p>
+            @for (int ix2 = 0; ix2 < groupedLevelList.Count; ix2++)
+            {
+                var levelKP = groupedLevelList.ElementAt(ix2);
+                <div class="border border-gray-200 rounded-md p-2 mt-1@(ix2 != groupedLevelList.Count - 1 ? " mb-2" : "")">
+                    <p class="text-sm leading-5 text-gray-900">@levelKP.Key</p>
+                    <ol class="mt-1 ml-4 text-sm leading-5 text-gray-900">
+                        @foreach (var level in levelKP.Value.OrderBy(lvl => lvl.Position))
+                        {
+                            <li><span class="inline-block w-6 text-gray-500">@level.Position.</span>@level.Name</li>
+                        }
+                    </ol>
+                </div>
+            }
+            @if (ViewData["IncludeNodeLink"] is bool includeNodeLink)
+            {
+                if (includeNodeLink)
+                {
+                    if ((bool)ViewData["IsStatic"])
+                    {
+                        <a class="inline-block mt-2 select-none underline font-medium text-sm text-indigo-600 hover:text-indigo-900" href="node-@(node.NodeId).aspx">
+                            View node
+                        </a>
+                    }
+                    else
+                    {
+                        <a class="inline-block mt-2 select-none underline font-medium text-sm text-indigo-600 hover:text-indigo-900"
+                            asp-controller="UoNode" asp-action="GetView" asp-route-id="@node.NodeId" asp-route-projectId="@ViewData["ProjectId"]"  asp-route-template="@ViewData["Template"]">
+                            View node
+                        </a>
+                    }
+                }
+            }
+        </div>
+    }
+}

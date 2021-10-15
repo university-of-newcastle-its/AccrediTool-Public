@@ -1,0 +1,234 @@
+﻿@model List<UoDocumentModel>
+
+@{
+    List<UoDocumentType> DocumentTypes = new List<UoDocumentType>();
+    if (ViewData["DocumentTypes"] is List<UoDocumentType> result)
+    {
+        DocumentTypes = result;
+    }
+    var workSamples = Model.Where(document => document.Type == UoDocumentType.WorkSample).ToList();
+    Model.RemoveAll(document => document.Type == UoDocumentType.WorkSample || document.Type == UoDocumentType.Feedback);
+    if (Model.Count > 0)
+    {
+        <div class="flex flex-col">
+            <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+                    <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="w-7/12 px-3 sm:px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                        Name
+                                    </th>
+                                    <th class="w-5/12 px-3 sm:px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                        Type
+                                    </th>
+                                    <th class="w-1/12 px-6 py-3 border-b border-gray-200 bg-gray-50"></th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach (var document in Model.OrderBy(doc => doc.Type))
+                                {
+                                    if (DocumentTypes.Contains(document.Type))
+                                    {
+                                        <tr>
+                                            <td class="w-7/12 py-3 px-3 sm:px-6 break-normal text-xs sm:text-sm leading-5 text-gray-500">
+                                                @document.Name
+                                            </td>
+                                            <td class="w-7/12 px-3 sm:px-6 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                                                @document.GetDocumentType()
+                                            </td>
+                                            <td class="w-1/12 pr-6 whitespace-no-wrap text-sm leading-5 font-medium">
+                                                <div class="flex items-center justify-end">
+                                                    <partial name="SVG/Paperclip" />
+                                                    <div class="ml-1">
+                                                        <a class="underline text-indigo-600 hover:text-indigo-900 cursor-pointer" href="@document.URI.AbsoluteUri" target="_blank">
+                                                            View<div class="hidden sm:inline"> file</div>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    if (workSamples.Count > 0)
+    {
+        var HDsamples = workSamples.Where(document => document.Grade == UoDocumentGrade.HD).ToList();
+        var Dsamples = workSamples.Where(document => document.Grade == UoDocumentGrade.D).ToList();
+        var Csamples = workSamples.Where(document => document.Grade == UoDocumentGrade.C).ToList();
+        var Psamples = workSamples.Where(document => document.Grade == UoDocumentGrade.P).ToList();
+        var FFsamples = workSamples.Where(document => document.Grade == UoDocumentGrade.FF).ToList();
+
+        <div class="">
+            <div class="mt-2 grid grid-cols-1 col-gap-4 row-gap-4 sm:grid-cols-3">
+                @if (HDsamples.Count > 0)
+                {
+                    <div class="sm:col-span-1 ie:pb-3">
+                        <div class="overflow-hidden shadow rounded-lg">
+                            <div class="bg-blue-300 border-b border-gray-200 p-4 sm:px-3 md:px-6">
+                                <h2 class="whitespace-no-wrap text-base font-semibold text-black">High Distinction</h2>
+                            </div>
+                            <div class="bg-blue-100 p-4 sm:px-3 md:px-6">
+                                @for (int ixHD = 0; ixHD < HDsamples.Count; ixHD++)
+                                {
+                                    var document = HDsamples.ElementAt(ixHD);
+                                    <div class="flex flex-wrap items-center">
+                                        <partial name="SVG/Paperclip" />
+                                        <div class="block truncate ml-1">
+                                            <a class="font-medium underline text-indigo-600 hover:text-indigo-900 text-sm" href="@document.URI.AbsoluteUri" target="_blank" title="@document.Name">
+                                                HD Sample @(ixHD + 1)
+                                            </a>
+                                        </div>
+                                        @if (document.Feedback != null)
+                                        {
+                                            <div class="w-full truncate ml-6">
+                                                <a class="font-medium underline text-indigo-600 hover:text-indigo-900 text-xs" href="@document.Feedback.URI.AbsoluteUri" target="_blank" title="@document.Feedback.Name">
+                                                    Feedback
+                                                </a>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+                @if (Dsamples.Count > 0)
+                {
+                    <div class="sm:col-span-1 ie:pb-3">
+                        <div class="overflow-hidden shadow rounded-lg">
+                            <div class="bg-teal-300 border-b border-gray-200 p-4 sm:px-3 md:px-6">
+                                <h2 class="whitespace-no-wrap text-base font-semibold text-black">Distinction</h2>
+                            </div>
+                            <div class="bg-teal-100 p-4 sm:px-3 md:px-6">
+                                @for (int ixD = 0; ixD < Dsamples.Count; ixD++)
+                                {
+                                    var document = Dsamples.ElementAt(ixD);
+                                    <div class="flex flex-wrap items-center">
+                                        <partial name="SVG/Paperclip" />
+                                        <div class="block truncate ml-1">
+                                            <a class="font-medium underline text-indigo-600 hover:text-indigo-900 text-sm" href="@document.URI.AbsoluteUri" target="_blank" title="@document.Name">
+                                                D Sample @(ixD + 1)
+                                            </a>
+                                        </div>
+                                        @if (document.Feedback != null)
+                                        {
+                                            <div class="w-full truncate ml-6">
+                                                <a class="font-medium underline text-indigo-600 hover:text-indigo-900 text-xs" href="@document.Feedback.URI.AbsoluteUri" target="_blank" title="@document.Feedback.Name">
+                                                    Feedback
+                                                </a>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+                @if (Csamples.Count > 0)
+                {
+                    <div class="sm:col-span-1 ie:pb-3">
+                        <div class="overflow-hidden shadow rounded-lg">
+                            <div class="bg-green-300 border-b border-gray-200 p-4 sm:px-3 md:px-6">
+                                <h2 class="whitespace-no-wrap text-base font-semibold text-black">Credit</h2>
+                            </div>
+                            <div class="bg-green-100 p-4 sm:px-3 md:px-6">
+                                @for (int ixC = 0; ixC < Csamples.Count; ixC++)
+                                {
+                                    var document = Csamples.ElementAt(ixC);
+                                    <div class="flex flex-wrap items-center">
+                                        <partial name="SVG/Paperclip" />
+                                        <div class="block truncate ml-1">
+                                            <a class="font-medium underline text-indigo-600 hover:text-indigo-900 text-sm" href="@document.URI.AbsoluteUri" target="_blank" title="@document.Name">
+                                                C Sample @(ixC + 1)
+                                            </a>
+                                        </div>
+                                        @if (document.Feedback != null)
+                                        {
+                                            <div class="w-full truncate ml-6">
+                                                <a class="font-medium underline text-indigo-600 hover:text-indigo-900 text-xs" href="@document.Feedback.URI.AbsoluteUri" target="_blank" title="@document.Feedback.Name">
+                                                    Feedback
+                                                </a>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+                @if (Psamples.Count > 0)
+                {
+                    <div class="sm:col-span-1 ie:pb-3">
+                        <div class="overflow-hidden shadow rounded-lg">
+                            <div class="bg-orange-300 border-b border-gray-200 p-4 sm:px-3 md:px-6">
+                                <h2 class="whitespace-no-wrap text-base font-semibold text-black">Pass</h2>
+                            </div>
+                            <div class="bg-orange-100 p-4 sm:px-3 md:px-6">
+                                @for (int ixP = 0; ixP < Psamples.Count; ixP++)
+                                {
+                                    var document = Psamples.ElementAt(ixP);
+                                    <div class="flex flex-wrap items-center">
+                                        <partial name="SVG/Paperclip" />
+                                        <div class="block truncate ml-1">
+                                            <a class="font-medium underline text-indigo-600 hover:text-indigo-900 text-sm" href="@document.URI.AbsoluteUri" target="_blank" title="@document.Name">
+                                                P Sample @(ixP + 1)
+                                            </a>
+                                        </div>
+                                        @if (document.Feedback != null)
+                                        {
+                                            <div class="w-full truncate ml-6">
+                                                <a class="font-medium underline text-indigo-600 hover:text-indigo-900 text-xs" href="@document.Feedback.URI.AbsoluteUri" target="_blank" title="@document.Feedback.Name">
+                                                    Feedback
+                                                </a>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+                @if (FFsamples.Count > 0)
+                {
+                    <div class="sm:col-span-1 ie:pb-3">
+                        <div class="overflow-hidden shadow rounded-lg">
+                            <div class="bg-red-300 border-b border-gray-200 p-4 sm:px-3 md:px-6">
+                                <h2 class="whitespace-no-wrap text-base font-semibold text-black">Fail</h2>
+                            </div>
+                            <div class="bg-red-100 p-4 sm:px-3 md:px-6">
+                                @for (int ixFF = 0; ixFF < FFsamples.Count; ixFF++)
+                                {
+                                    var document = FFsamples.ElementAt(ixFF);
+                                    <div class="flex flex-wrap items-center">
+                                        <partial name="SVG/Paperclip" />
+                                        <div class="block truncate ml-1">
+                                            <a class="font-medium underline text-indigo-600 hover:text-indigo-900 text-sm" href="@document.URI.AbsoluteUri" target="_blank" title="@document.Name">
+                                                FF Sample @(ixFF + 1)
+                                            </a>
+                                        </div>
+                                        @if (document.Feedback != null)
+                                        {
+                                            <div class="w-full truncate ml-6">
+                                                <a class="font-medium underline text-indigo-600 hover:text-indigo-900 text-xs" href="@document.Feedback.URI.AbsoluteUri" target="_blank" title="@document.Feedback.Name">
+                                                    Feedback
+                                                </a>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+}

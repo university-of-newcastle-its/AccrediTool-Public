@@ -1,0 +1,41 @@
+﻿@model UoFrameworkModel
+@{
+    ViewData["Framework"] = @Model;
+    ViewData["ViewName"] = @Model.CustomFrameworkNoun;
+    ViewData["Title"] = @Model.Name;
+}
+
+<style>
+    .subnodes[open] > summary {
+        /* text-indigo-900 */
+        color: #362f78;
+        color: rgba(54, 47, 120, 1);
+    }
+
+    .subnodes[open] > summary > span {
+        display: none;
+    }
+
+    .subnodes[open] > summary::after {
+        content: "Hide @Model.CustomNodePluralNoun.ToLower()";
+    }
+</style>
+
+<section class="py-4">
+    <div class="bg-white overflow-hidden shadow sm:rounded-lg">
+        <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
+            <h2 class="text-lg leading-6 font-medium text-gray-900">
+                @Model.Name
+            </h2>
+            @if (Model.Description != null)
+            {
+                <p class="mt-1 text-sm leading-5 text-gray-500">
+                    @Model.Description
+                </p>
+            }
+        </div>
+        <div class="px-4 py-5 sm:px-6">
+            <partial name="_Nodes" model="Model.Nodes" />
+        </div>
+    </div>
+</section>

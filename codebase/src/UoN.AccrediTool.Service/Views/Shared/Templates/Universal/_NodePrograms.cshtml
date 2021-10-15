@@ -1,0 +1,58 @@
+﻿@model List<UoNodeProgramsJoin>
+
+<h2 class="text-base leading-6 font-medium text-gray-900">Direct Mapping</h2>
+<div class="my-2 flex flex-col">
+    <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+            <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="w-2/12 px-3 sm:px-6 py-3 bg-gray-50 whitespace-no-wrap text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="hidden sm:inline">Program </div>Code
+                            </th>
+                            <th class="w-7/12 px-3 sm:px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Name
+                            </th>
+                            <th class="hidden md:table-cell w-2/12 px-6 py-3 bg-gray-50 text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Campus
+                            </th>
+                            <th class="w-1/12 px-0 sm:px-6 py-3 bg-gray-50"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach (UoNodeProgramsJoin join in Model)
+                        {
+                            <tr>
+                                <td class="px-3 sm:px-6 py-4 whitespace-no-wrap text-sm leading-5 font-medium text-gray-900">
+                                    @join.Program.ProgramCode
+                                </td>
+                                <td class="px-3 sm:px-6 py-4 text-sm leading-5 text-gray-500">
+                                    @join.Program.Name
+                                </td>
+                                <td class="hidden md:table-cell px-6 py-4 whitespace-no-wrap text-center text-sm leading-5 text-gray-500">
+                                    @join.Program.Campus.Name
+                                </td>
+                                <td class="pr-3 sm:px-6 py-4 whitespace-no-wrap text-right text-sm leading-5 font-medium">
+                                    @if ((bool)ViewData["IsStatic"])
+                                    {
+                                        <a class="select-none underline font-medium text-sm text-indigo-600 hover:text-indigo-900" href="program-@(join.ProgramId).aspx">
+                                            View program
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a class="select-none underline font-medium text-sm text-indigo-600 hover:text-indigo-900"
+                                           asp-controller="UoProgram" asp-action="GetView" asp-route-id="@join.ProgramId" asp-route-projectId="@ViewData["ProjectId"]" asp-route-template="@ViewData["Template"]">
+                                            View program
+                                        </a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

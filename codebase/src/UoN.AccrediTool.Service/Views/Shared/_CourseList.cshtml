@@ -1,0 +1,69 @@
+﻿@model UoCourseListModel
+
+<div class="mb-2">
+    <h3 class="text-xl font-semibold text-gray-900">@Model.Name</h3>
+    @if (Model.Major != null)
+    {
+        <p class="mt-1 text-sm leading-5 text-gray-500">@Model.Major</p>
+    }
+</div>
+<div class="flex flex-col">
+    <div class="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+        <div class="align-middle inline-block min-w-full shadow overflow-hidden rounded-lg border-b border-gray-200">
+            <table class="min-w-full">
+                <thead>
+                    <tr>
+                        <th class="w-2/12 px-6 py-3 whitespace-no-wrap border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                            Course Code
+                        </th>
+                        <th class="w-5/12 sm:px-3 lg:px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                            Name
+                        </th>
+                        <th class="hidden lg:table-cell w-3/12 px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                            Field of Education
+                        </th>
+                        <th class="hidden md:table-cell w-1/12 px-6 py-3 border-b border-gray-200 bg-gray-50 text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                            Units
+                        </th>
+                        <th class="w-1/12 px-6 py-3 border-b border-gray-200 bg-gray-50"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int ix1 = 0; ix1 < Model.Courses.Count; ix1++)
+                    {
+                        var course = Model.Courses[ix1];
+                        <tr class="h-13@(ix1 != Model.Courses.Count - 1 ? " border-b border-gray-200" : "")">
+                            <td class="w-2/12 px-6 whitespace-no-wrap text-sm leading-5 font-medium text-gray-900">
+                                <div class="flex items-center">@course.GetCourseCode()</div>
+                            </td>
+                            <td class="w-5/12 sm:px-3 lg:px-6 break-normal text-xs sm:text-sm leading-5 text-gray-500">
+                                @course.Name
+                            </td>
+                            <td class="hidden lg:table-cell w-3/12 px-6 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                                @course.FieldOfEducation.Name
+                            </td>
+                            <td class="hidden md:table-cell w-1/12 px-6 whitespace-no-wrap text-center text-sm leading-5 text-gray-500">
+                                @course.Units
+                            </td>
+                            <td class="w-1/12 px-6 whitespace-no-wrap text-right text-sm leading-5 font-medium">
+                                @if ((bool)ViewData["IsStatic"])
+                                {
+                                    <a class="underline text-indigo-600 hover:text-indigo-900" href="course-@(course.CourseId).aspx">
+                                        View<div class="hidden sm:inline"> course</div>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a class="underline text-indigo-600 hover:text-indigo-900"
+                                       asp-controller="UoCourse" asp-action="GetView" asp-route-id="@course.CourseId" asp-route-projectId="@ViewData["ProjectId"]" asp-route-template="@ViewData["Template"]">
+                                        View<div class="hidden sm:inline"> course</div>
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

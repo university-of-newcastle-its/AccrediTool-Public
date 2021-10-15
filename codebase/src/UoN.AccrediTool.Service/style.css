@@ -1,0 +1,29 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Internet Explorer 11 */
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    .ie\:hidden {
+        display: none;
+    }
+
+    .ie\:block {
+        display: block;
+    }
+
+    .ie\:pb-3 {
+        padding-bottom: 0.75rem;
+    }
+}
+
+/* Microsoft Edge (Legacy) */
+@supports (display:-ms-grid) {
+    .edge\:hidden {
+        display: none;
+    }
+
+    .edge\:block {
+        display: block;
+    }
+}

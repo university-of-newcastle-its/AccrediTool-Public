@@ -1,0 +1,25 @@
+﻿<div class="flex-shrink-0 flex border-t border-gray-200 p-4">
+    <div class="@((bool)ViewData["IsMobile"] ? "focus:outline-none " : "")flex-shrink-0 w-full group block">
+        <div class="flex items-center">
+            @if (User.Identity.IsAuthenticated)
+            {
+                <div>
+                    <img class="inline-block @((bool)ViewData["IsMobile"] ? "h-10 w-10" : "h-9 w-9") rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+                </div>
+                <div class="ml-3">
+                    <p class="text-base @((bool)ViewData["IsMobile"] ? "leading-6" : "leading-5") font-medium text-gray-700 group-hover:text-gray-900">
+                        @User.Identity.Name
+                    </p>
+                    <p class="text-sm @((bool)ViewData["IsMobile"] ? "leading-5" : "leading-4") font-medium text-gray-500 group-hover:text-gray-700 group-focus:underline transition ease-in-out duration-150">
+                        <a class="cursor-pointer" onclick="document.getElementById('logout_form').submit();">Log out</a>
+                    </p>
+                </div>
+                <form asp-page="Account/Logout" method="post" id="logout_form"></form>
+            }
+            else
+            {
+                <a asp-page="Account/Login">Log in</a>
+            }
+        </div>
+    </div>
+</div>

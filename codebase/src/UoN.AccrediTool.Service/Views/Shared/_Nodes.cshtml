@@ -1,0 +1,57 @@
+﻿@model List<UoNodeModel>
+@{ 
+    var framework = (UoFrameworkModel)ViewData["Framework"];
+}
+
+@foreach (UoNodeModel node in Model)
+{
+    <div class="mt-2 bg-white overflow-hidden shadow sm:rounded-lg">
+        <div class="px-4 py-4 sm:px-6">
+            <dl class="block">
+                <dt class="text-sm leading-5 font-medium text-gray-500">
+                    Name
+                </dt>
+                <dd class="flex items-center mt-1 text-sm leading-5 text-gray-900">
+                    @if (node.NodeCode != null)
+                    {
+                        <span class="inline-flex items-center px-2.5 py-0.5 mr-2 rounded-md font-semibold leading-5 tracking-wider bg-gray-100">@node.NodeCode</span>
+                    }
+                    <span>@node.Name</span>
+                </dd>
+            </dl>
+            @if (node.Description != null)
+            {
+                <dl class="mt-2">
+                    <dt class="text-sm leading-5 font-medium text-gray-500">
+                        Description
+                    </dt>
+                    <dd class="mt-1 text-sm leading-5 text-gray-900">
+                        @node.Description
+                    </dd>
+                </dl>
+            }
+            @if ((bool)ViewData["IsStatic"])
+            {
+                <a class="block mt-2 select-none underline font-medium text-sm text-indigo-600 hover:text-indigo-900 cursor-pointer" href="node-@(node.NodeId).aspx">
+                    View @(framework != null ? @framework.CustomNodeNoun.ToLower() : "node")
+                </a>
+            }
+            else
+            {
+                <a class="block mt-2 select-none underline font-medium text-sm text-indigo-600 hover:text-indigo-900 cursor-pointer"
+                   asp-controller="UoNode" asp-action="GetView" asp-route-id="@node.NodeId" asp-route-projectId="@ViewData["ProjectId"]" asp-route-template="@ViewData["Template"]">
+                    View @(framework != null ? @framework.CustomNodeNoun.ToLower() : "node")
+                </a>
+            }
+            @if (node.ChildNodes.Count > 0)
+            {
+                <details class="subnodes mt-2">
+                    <summary class="ie:hidden edge:hidden select-none underline font-medium text-sm text-indigo-600 hover:text-indigo-900 cursor-pointer">
+                        <span>Show @(framework != null ? @framework.CustomNodePluralNoun.ToLower() : "sub-nodes")</span>
+                    </summary>
+                    <partial name="_Nodes" model="node.ChildNodes" />
+                </details>
+            }
+        </div>
+    </div>
+}

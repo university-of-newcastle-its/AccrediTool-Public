@@ -1,0 +1,95 @@
+﻿@model List<UoLevelProgramsJoin>
+
+<h2 class="text-base leading-6 font-medium text-gray-900 mb-2">Levelled Mapping</h2>
+@{
+    var programs = Model.GroupBy(join => join.ProgramId).Select(join => join.First()).Select(join => join.Program).ToList();
+    for (int ix1 = 0; ix1 < programs.Count; ix1++)
+    {
+        var program = programs.ElementAt(ix1);
+        <div class="border border-gray-200 rounded-md py-3 px-3@(ix1 != programs.Count - 1 ? " mb-4" : "")">
+            <div class="grid grid-cols-1 col-gap-4 row-gap-8 sm:grid-cols-2">
+                <dl class="sm:col-span-1 pb-3">
+                    <dt class="text-sm leading-5 font-medium text-gray-500">
+                        Program Code
+                    </dt>
+                    <dd class="mt-1 text-sm leading-5 text-gray-900">
+                        @program.ProgramCode
+                    </dd>
+                </dl>
+                <dl class="sm:col-span-1 pb-3">
+                    <dt class="text-sm leading-5 font-medium text-gray-500">
+                        Name
+                    </dt>
+                    <dd class="mt-1 text-sm leading-5 text-gray-900">
+                        @program.Name
+                    </dd>
+                </dl>
+                <dl class="sm:col-span-1 pb-3">
+                    <dt class="text-sm leading-5 font-medium text-gray-500">
+                        Campus
+                    </dt>
+                    <dd class="mt-1 text-sm leading-5 text-gray-900">
+                        @program.Campus.Name
+                    </dd>
+                </dl>
+                @if (program.FirstTermCode != null)
+                {
+                    <dl class="sm:col-span-1 pb-3">
+                        <dt class="text-sm leading-5 font-medium text-gray-500">
+                            Start term
+                        </dt>
+                        <dd class="mt-1 text-sm leading-5 text-gray-900">
+                            @program.GetFirstYear() @program.GetFirstTerm()
+                        </dd>
+                    </dl>
+                }
+                <div class="sm:col-span-2">
+                    @if ((bool)ViewData["IsStatic"])
+                    {
+                        <a class="select-none underline font-medium text-sm text-indigo-600 hover:text-indigo-900" href="program-@(program.ProgramId).aspx">
+                            View program
+                        </a>
+                    }
+                    else
+                    {
+                        <a class="select-none underline font-medium text-sm text-indigo-600 hover:text-indigo-900"
+                           asp-controller="UoProgram" asp-action="GetView" asp-route-id="@program.ProgramId" asp-route-projectId="@ViewData["ProjectId"]"  asp-route-template="@ViewData["Template"]">
+                            View program
+                        </a>
+                    }
+                </div>
+            </div>
+            @{
+                var levelList = Model.Where(join => join.ProgramId == program.ProgramId).Select(join => join.Level).ToList();
+                <p class="block mt-3 text-sm leading-5 font-medium text-gray-500">Mapped Level@(levelList.Count > 1 ? "s" : "")</p>
+                var groupedLevels = new Dictionary<string, List<UoLevelModel>>();
+                foreach (var level in levelList)
+                {
+                    string levelCategoryName = level.LevelCategory.Name;
+                    if (groupedLevels.ContainsKey(levelCategoryName))
+                    {
+                        groupedLevels[levelCategoryName].Add(level);
+                    }
+                    else
+                    {
+                        groupedLevels.Add(levelCategoryName, new List<UoLevelModel>() { level });
+                    }
+                }
+                var groupedLevelList = groupedLevels.ToList();
+                for (int ix2 = 0; ix2 < groupedLevelList.Count; ix2++)
+                {
+                    var levelKP = groupedLevelList.ElementAt(ix2);
+                    <div class="border border-gray-200 rounded-md p-2 mt-1@(ix2 != groupedLevelList.Count - 1 ? " mb-2" : "")">
+                        <p class="text-sm leading-5 text-gray-900">@levelKP.Key</p>
+                        <ol class="mt-1 ml-4 text-sm leading-5 text-gray-900">
+                            @foreach (var level in levelKP.Value.OrderBy(lvl => lvl.Position))
+                            {
+                                <li><span class="inline-block w-6 text-gray-500">@level.Position.</span>@level.Name</li>
+                            }
+                        </ol>
+                    </div>
+                }
+            }
+        </div>
+    }
+}

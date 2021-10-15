@@ -1,0 +1,21 @@
+{
+  "version": "0.1.0",
+  "name": "uon.accreditool.service",
+  "author": "The University of Newcastle, Australia",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "build": "postcss style.css -u tailwindcss --env development -o ./wwwroot/css/site.css",
+    "publish": "postcss style.css -u tailwindcss postcss-csso --env production -o ./wwwroot/css/site.min.css"
+  },
+  "devDependencies": {
+    "@tailwindcss/ui": "^0.7.2",
+    "postcss": "^8.1.10",
+    "postcss-cli": "^8.3.0",
+    "postcss-csso": "^5.0.0",
+    "tailwindcss": "1.9.6"
+  },
+  "dependencies": {
+    "alpinejs": "^2.7.0"
+  }
+}

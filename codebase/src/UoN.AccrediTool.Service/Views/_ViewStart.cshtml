@@ -1,0 +1,19 @@
+﻿@using System.Net.Http;
+@using Newtonsoft.Json;
+@{
+    Layout = "_Layout";
+    ViewData["Host"] = "http" + (Context.Request.IsHttps ? "s" : "") + "://" + Context.Request.Host.ToString();
+    if (System.Web.HttpUtility.ParseQueryString(Context.Request.QueryString.ToString()).Get("projectId") is string project)
+    {
+        if (int.Parse(project) is int projectId)
+        {
+            HttpClient client = new HttpClient();
+            string uri = ViewData["Host"] + "/api/projects/" + projectId;
+            HttpResponseMessage response = await client.GetAsync(new System.Uri(uri)).ConfigureAwait(false);
+            if (response.IsSuccessStatusCode)
+            {
+                ViewData["Project"] = JsonConvert.DeserializeObject<UoProjectModel>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
+            }
+        }
+    }
+}

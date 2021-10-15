@@ -1,0 +1,26 @@
+﻿@model List<UoLevelCategoryModel>
+
+@for (int ix1 = 0; ix1 < Model.Count; ix1++)
+{
+    var levelCategory = Model.ElementAt(ix1);
+    @if (levelCategory.Levels.Count > 0)
+    {
+        var levels = levelCategory.Levels.OrderBy(lvl => lvl.Position).ToList();
+        <div class="@(ix1 != Model.Count - 1 ? "mb-2" : "")">
+            <h3 class="text-base font-semibold text-gray-900">@levelCategory.Name</h3>
+            <ol class="mt-1 ml-4 text-sm leading-5 text-gray-900">
+                @for (int ix2 = 0; ix2 < levels.Count; ix2++)
+                {
+                    var level = levels[ix2];
+                    <li>
+                        <div><span class="inline-block w-6 text-gray-500">@level.Position.</span>@level.Name</div>
+                        @if (level.Description != null)
+                        {
+                            <div class="text-xs text-gray-800@(ix2 != levels.Count - 1 ? " mb-1" : "")">@level.Description</div>
+                        }
+                    </li>
+                }
+            </ol>
+        </div>
+    }
+}

@@ -1,0 +1,300 @@
+﻿@model List<Dictionary<string, object>>
+
+<style>
+    #legend[open] > summary {
+        /* text-indigo-900 */
+        color: #362f78;
+        color: rgba(54, 47, 120, 1);
+    }
+
+        #legend[open] > summary > span {
+            display: none;
+        }
+
+        #legend[open] > summary::after {
+            content: "Hide legend";
+        }
+
+    .ea-level-1 {
+        background-color: #ffa600;
+        background-color: rgba(255, 166, 0, 1);
+    }
+
+    .ea-level-1-2 {
+        background-color: #ff764a;
+        background-color: rgba(255, 118, 74, 1);
+    }
+
+    .ea-level-2 {
+        color: #fff;
+        background-color: #ef5675;
+        background-color: rgba(239, 86, 117, 1);
+    }
+
+    .ea-level-2-3 {
+        color: #fff;
+        background-color: #bc5090;
+        background-color: rgba(188, 80, 144, 1);
+    }
+
+    .ea-level-3 {
+        color: #fff;
+        background-color: #7a5195;
+        background-color: rgba(122, 81, 149, 1);
+    }
+
+    .ea-level-3-4 {
+        color: #fff;
+        background-color: #374c80;
+        background-color: rgba(55, 76, 128, 1);
+    }
+
+    .ea-level-4 {
+        color: #fff;
+        background-color: #003f5c;
+        background-color: rgba(0, 63,92, 1);
+    }
+</style>
+@{
+    var nodes = new Dictionary<int, UoNodeModel>();
+    var levels = new Dictionary<int, List<UoLevelModel>>();
+    foreach (var nodeLevel in Model)
+    {
+        object nodeOut;
+        object levelOut;
+        if (nodeLevel.TryGetValue("node", out nodeOut) && nodeLevel.TryGetValue("level", out levelOut))
+        {
+            if (nodeOut is UoNodeModel node && levelOut is UoLevelModel level)
+            {
+                if (nodes.ContainsKey(node.NodeId) && levels.ContainsKey(node.NodeId))
+                {
+                    levels[node.NodeId].Add(level);
+                }
+                else
+                {
+                    nodes.Add(node.NodeId, node);
+                    levels.Add(node.NodeId, new List<UoLevelModel>() { level });
+                }
+            }
+        }
+    }
+    var nodeList = nodes.ToList().OrderBy(kp => kp.Value.NodeId);
+    <details id="legend" class="pb-6">
+        <summary class="ie:hidden edge:hidden inline select-none underline font-medium text-indigo-600 hover:text-indigo-900 cursor-pointer"><span>Show legend</span></summary>
+        <h3 class="hidden ie:block edge:block text-base leading-5 font-medium text-gray-500">Legend</h3>
+        <partial name="Templates/EngineersAustralia/_LevelCategories" />
+    </details>
+    <!-- Desktop version -->
+    <div class="hidden sm:flex flex-col">
+        <div class="-my-2 pb-2 overflow-x-auto -mx-6 px-6 lg:-mx-8 lg:px-8">
+            <div class="align-middle inline-block min-w-full shadow overflow-hidden rounded-lg border-b border-gray-200">
+                <table class="min-w-full">
+                    <thead>
+                        <tr>
+                            <th class="w-8/12 px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="hidden sm:inline">Element of </div>Competency
+                            </th>
+                            <th class="w-1/12 px-1 py-3 border-b border-gray-200 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Taught
+                            </th>
+                            <th class="w-1/12 px-1 py-3 border-b border-gray-200 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Practiced
+                            </th>
+                            <th class="w-1/12 px-1 py-3 border-b border-gray-200 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Assessed
+                            </th>
+                            <th class="w-1/12 px-1 py-3 border-b border-gray-200 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Level
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white">
+                        @for (int ix1 = 0; ix1 < nodeList.Count(); ix1++)
+                        {
+                            var nodeKP = nodeList.ElementAt(ix1);
+                            var bloomsLevels = levels[nodeKP.Key].Where(level => level.LevelCategory.Name == "Implied Pedagogy");
+                            var capability = string.Join("-", levels[nodeKP.Key].Where(level => level.LevelCategory.Name == "Level of Capability").Select(level => level.Position));
+                            <tr class="bg-white@(ix1 != nodeList.Count() - 1 ? " border-b border-gray-200" : "")">
+                                <td class="px-6 py-2 text-sm text-left leading-5">
+                                    <div class="pb-2">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 mr-2 rounded-md font-medium leading-5 tracking-wider bg-gray-@nodeKP.Value.ParentNode.Position.ToString()00 text-gray-900">
+                                            @nodeKP.Value.ParentNode.Position.@nodeKP.Value.Position
+                                        </span>
+                                        <span class="text-xs text-gray-500">@nodeKP.Value.Name</span>
+                                    </div>
+                                    @if ((bool)ViewData["IsStatic"])
+                                    {
+                                        <a class="underline font-medium text-indigo-600 hover:text-indigo-900" href="node-@(nodeKP.Key).aspx">
+                                            View element of competency
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a class="underline font-medium text-indigo-600 hover:text-indigo-900"
+                                           asp-controller="UoNode" asp-action="GetView" asp-route-id="@nodeKP.Key" asp-route-projectId="@ViewData["ProjectId"]" asp-route-template="@ViewData["Template"]">
+                                            View element of competency
+                                        </a>
+                                    }
+                                </td>
+                                @if (bloomsLevels.Any())
+                                {
+                                    @foreach (int position in new List<int>() { 1, 2, 3 })
+                                    {
+                                        var blooms = bloomsLevels.Where(level => level.Position == position);
+                                        bool isMapped = blooms.Any();
+                                        <td class="h-24 whitespace-no-wrap text-center border-l border-gray-200">
+                                            <div title="@(isMapped ? blooms.First().Name : "")" class="h-14 w-14 mx-auto @(isMapped ? "text-gray-500" : "text-gray-200")">
+                                                @if (isMapped)
+                                                {
+                                                    <partial name="SVG/CircleCheckmark" />
+                                                }
+                                                else
+                                                {
+                                                    <partial name="SVG/CircleCross" />
+                                                }
+                                            </div>
+                                        </td>
+                                    }
+                                }
+                                else
+                                {
+                                    <td class="h-24 whitespace-no-wrap text-center border-l border-gray-200">
+                                        <div title="Taught" class="h-14 w-14 mx-auto text-gray-200">
+                                            <partial name="SVG/CircleQuestionmark" />
+                                        </div>
+                                    </td>
+                                    <td class="h-24 whitespace-no-wrap text-center border-l border-gray-200">
+                                        <div title="Practiced" class="h-14 w-14 mx-auto text-gray-200">
+                                            <partial name="SVG/CircleQuestionmark" />
+                                        </div>
+                                    </td>
+                                    <td class="h-24 whitespace-no-wrap text-center border-l border-gray-200">
+                                        <div title="Assessed" class="h-14 w-14 mx-auto text-gray-200">
+                                            <partial name="SVG/CircleQuestionmark" />
+                                        </div>
+                                    </td>
+                                }
+                                @if (capability != "")
+                                {
+                                    <td class="h-24 whitespace-no-wrap text-center text-xl leading-5 border-l border-gray-200 ea-level-@capability">
+                                        @capability
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="text-center text-gray-500 border-l border-gray-200">?</td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- Mobile version -->
+    <div class="flex flex-col px-2 sm:hidden">
+        @for (int ix2 = 0; ix2 < nodeList.Count(); ix2++)
+        {
+            var nodeKP = nodeList.ElementAt(ix2);
+            var bloomsLevels = levels[nodeKP.Key].Where(level => level.LevelCategory.Name == "Implied Pedagogy");
+            var capability = string.Join("-", levels[nodeKP.Key].Where(level => level.LevelCategory.Name == "Level of Capability").Select(level => level.Position));
+            <div class="mb-4 bg-white overflow-hidden shadow">
+                <div class="px-2 py-5 border-b border-gray-200">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">
+                        @nodeKP.Value.ParentNode.Position.@nodeKP.Value.Position
+                    </h3>
+                    <p class="my-1 max-w-2xl text-sm leading-5 text-gray-500">
+                        @nodeKP.Value.Name
+                    </p>
+                    @if ((bool)ViewData["IsStatic"])
+                    {
+                        <a class="underline font-medium text-indigo-600 hover:text-indigo-900" href="node-@(nodeKP.Key).aspx">
+                            View competency
+                        </a>
+                    }
+                    else
+                    {
+                        <a class="underline font-medium text-indigo-600 hover:text-indigo-900"
+                           asp-controller="UoNode" asp-action="GetView" asp-route-id="@nodeKP.Key" asp-route-projectId="@ViewData["ProjectId"]" asp-route-template="@ViewData["Template"]">
+                            View competency
+                        </a>
+                    }
+                </div>
+                <div class="flex flex-col items-center py-5">
+                    <div class="w-full shadow overflow-hidden">
+                        <table class="w-full">
+                            <thead>
+                                <tr>
+                                    <th class="py-3 w-1/4 border-b border-gray-200 bg-gray-50 text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                        Taught
+                                    </th>
+                                    <th class="w-1/4 border-b border-gray-200 bg-gray-50 text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                        Practiced
+                                    </th>
+                                    <th class="w-1/4 border-b border-gray-200 bg-gray-50 text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                        Assessed
+                                    </th>
+                                    <th class="w-1/4 border-b border-gray-200 bg-gray-50 text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                        Level
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="bg-white">
+                                    @if (bloomsLevels.Any())
+                                    {
+                                        @foreach (int position in new List<int>() { 1, 2, 3 })
+                                        {
+                                            var blooms = bloomsLevels.Where(level => level.Position == position);
+                                            bool isMapped = blooms.Any();
+                                            <td class="whitespace-no-wrap text-center border-l border-gray-200">
+                                                <div title="@(isMapped ? blooms.First().Name : "")" class="h-12 w-12 mx-auto @(isMapped ? "text-gray-500" : "text-gray-200")">
+                                                    @if (isMapped)
+                                                    {
+                                                        <partial name="SVG/CircleCheckmark" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <partial name="SVG/CircleCross" />
+                                                    }
+                                                </div>
+                                            </td>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <td class="whitespace-no-wrap text-center border-l border-gray-200">
+                                            <div title="Taught" class="h-12 w-12 mx-auto text-gray-200">
+                                                <partial name="SVG/CircleQuestionmark" />
+                                            </div>
+                                        </td>
+                                        <td class="whitespace-no-wrap text-center border-l border-gray-200">
+                                            <div title="Practiced" class="h-12 w-12 mx-auto text-gray-200">
+                                                <partial name="SVG/CircleQuestionmark" />
+                                            </div>
+                                        </td>
+                                        <td class="whitespace-no-wrap text-center border-l border-gray-200">
+                                            <div title="Assessed" class="h-12 w-12 mx-auto text-gray-200">
+                                                <partial name="SVG/CircleQuestionmark" />
+                                            </div>
+                                        </td>
+                                    }
+                                    @if (capability != "")
+                                    {
+                                        <td class="whitespace-no-wrap text-center text-base leading-5 border-l border-gray-200 ea-level-@capability">
+                                            @capability
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td class="text-center text-gray-500 border-l border-gray-200">?</td>
+                                    }
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

@@ -1,0 +1,64 @@
+﻿@model List<UoNodeCoursesJoin>
+
+<h2 class="text-base leading-6 font-medium text-gray-900">Direct Mapping</h2>
+<div class="my-2 flex flex-col">
+    <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+            <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="w-2/12 px-3 sm:px-6 py-3 bg-gray-50 whitespace-no-wrap text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="hidden sm:inline">Course </div>Code
+                            </th>
+                            <th class="w-5/12 px-3 sm:px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Name
+                            </th>
+                            <th class="hidden lg:table-cell w-3/12 px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Field of Education
+                            </th>
+                            <th class="hidden md:table-cell w-1/12 px-6 py-3 bg-gray-50 text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Units
+                            </th>
+                            <th class="w-1/12 px-0 sm:px-6 py-3 bg-gray-50"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach (UoNodeCoursesJoin join in Model)
+                        {
+                            <tr>
+                                <td class="px-3 sm:px-6 py-4 whitespace-no-wrap text-sm leading-5 font-medium text-gray-900">
+                                    @join.Course.GetCourseCode()
+                                </td>
+                                <td class="px-3 sm:px-6 py-4 text-sm leading-5 text-gray-500">
+                                    @join.Course.Name
+                                </td>
+                                <td class="hidden lg:table-cell px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                                    @join.Course.FieldOfEducation.Name
+                                </td>
+                                <td class="hidden md:table-cell px-6 py-4 whitespace-no-wrap text-center text-sm leading-5 text-gray-500">
+                                    @join.Course.Units
+                                </td>
+                                <td class="pr-3 sm:px-6 py-4 whitespace-no-wrap text-right text-sm leading-5 font-medium">
+                                    @if ((bool)ViewData["IsStatic"])
+                                    {
+                                        <a class="select-none underline font-medium text-sm text-indigo-600 hover:text-indigo-900" href="course-@(join.CourseId).aspx">
+                                            View course
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a class="select-none underline font-medium text-sm text-indigo-600 hover:text-indigo-900"
+                                           asp-controller="UoCourse" asp-action="GetView" asp-route-id="@join.CourseId" asp-route-projectId="@ViewData["ProjectId"]" asp-route-template="@ViewData["Template"]">
+                                            View course
+                                        </a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
