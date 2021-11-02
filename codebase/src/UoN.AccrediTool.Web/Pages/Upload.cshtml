@@ -1,0 +1,17 @@
+@page
+@model UploadModel
+
+<section class="py-4">
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+            <form method="post" enctype="multipart/form-data">
+                <input type="file" asp-for="fileUpload">
+                <button type="submit" value="Submit" >submit</button>
+            </form>
+        <p>
+            @Model.getErrorString()
+        </p>
+        </div>
+      </div>
+
+</section>

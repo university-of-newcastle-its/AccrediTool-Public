@@ -62,10 +62,13 @@ namespace UoN.AccrediTool.Web
                     RoleClaimType = Configuration["Okta:RoleClaimType"],
                     ValidateIssuer = true
                 };
+
+                options.RequireHttpsMetadata = false; // FOR DEV ONLY
             });
 
             services.AddAuthorization();
             services.AddRazorPages();
+
         }
 
         /// <summary>
