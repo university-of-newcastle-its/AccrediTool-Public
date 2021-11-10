@@ -1,17 +1,45 @@
 @page
 @model UploadModel
+@{
+  ViewData["Title"] = "Upload Program";
+}
+
+
 
 <section class="py-4">
-      <div class="bg-white overflow-hidden shadow rounded-lg">
+    <div class="bg-white overflow-hidden shadow rounded-lg">
         <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
             <form method="post" enctype="multipart/form-data">
                 <input type="file" asp-for="fileUpload">
                 <button type="submit" value="Submit" >submit</button>
             </form>
         <p>
-            @Model.getErrorString()
+            @{Model.getErrorString();}
         </p>
         </div>
-      </div>
+    </div>
+    <br>
+    @if (Model.hasUpload())
+    {
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+                <h2 class="text-lg font-semibold text-gray-900">@Model._ProjectDescription</h2>
+            </div>
+            <hr>
+                <div class="px-4 py-5 sm:p-6">
+                    <div class="grid grid-cols-1 col-gap-4 row-gap-8 sm:grid-cols-2 -mb-3">
+                        <dl class="sm:col-span-1 pb-3">
+                            <dt class="text-sm leading-5 font-medium text-gray-500">
+                                Program code
+                            </dt>
+                            <dd class="mt-1 text-sm leading-5 text-gray-900">
+                                @Model._Program.Name
+                            </dd>
+                        </dl>
+                </div>
+            </div>
+        </div>
+    }
+    
 
 </section>

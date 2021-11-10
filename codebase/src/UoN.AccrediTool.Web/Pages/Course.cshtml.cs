@@ -44,6 +44,8 @@ namespace UoN.AccrediTool.Web.Pages
         {
             // _ = _client?.Get<List<UoCourseModel>>(new Uri(_Configuration["Services:UoN.AccrediTool.Service:CoursePath"], UriKind.Relative));
 
+
+            //TODO: this needs to be updated to fetch all the courses in the DB
             Course = new UoCourseModel
             {
                 CourseId = 1,
