@@ -11,6 +11,9 @@ using System.Net;
 using System.Linq;
 using System.Collections.Generic; 
 using System.Text.RegularExpressions;  
+using System;
+using System.Diagnostics;
+using System.IO;
 
 //OpenXML
 using DocumentFormat.OpenXml;
@@ -36,12 +39,19 @@ namespace UoN.AccrediTool.Web.Pages
 
         private Boolean uploaded = false;
 
-        private String zipRoot = "filestructure/"; 
+        private String zipRoot = ""; 
 
         //=== vars from zip file===
         public String _ProjectName {get; set;}
         public String _ProjectDescription {get; set;}
         public UoProgramModel _Program;
+
+        List<UoCourseListModel> _CourseListModels = new List<UoCourseListModel>();
+        List<String[]> _CourseListIds = new List<String[]>();
+        UoFrameworkModel _Framework = new UoFrameworkModel();
+        
+        List<UoCourseModel> _CourseModels = new List<UoCourseModel>();
+        List<UoLevelCategoryModel> _LevelCategories = new List<UoLevelCategoryModel>();
 
 
         public async Task OnPostAsync()
@@ -76,16 +86,98 @@ namespace UoN.AccrediTool.Web.Pages
         {
 
 
+            //===Get FrameworkData===
+
+            
+            ZipArchiveEntry _FrameworkData = zip.GetEntry(zipRoot + "TemplateInfo/TemplateData.xlsx");
+            SpreadsheetDocument _FrameworkDataXLSX = getSpreadSheetFromZip(_FrameworkData);
+
+            List<UoNodeModel> _Nodes = new List<UoNodeModel>();
+            
+            int j = 1;
+
+            foreach(Sheet sheet in _FrameworkDataXLSX.WorkbookPart.Workbook.Sheets)
+            {
+                if(sheet.Name.Equals("FRAMEWORK"))
+                {
+                    _Framework.Name = getCellValue(_FrameworkDataXLSX, "FRAMEWORK", "A2");                      // set framework name
+                    _Framework.Description = getCellValue(_FrameworkDataXLSX, "FRAMEWORK", "B2");               // set framework description
+                    _Framework.TemplateName =  getCellValue(_FrameworkDataXLSX, "FRAMEWORK", "C2");             // set framework template name
+                    _Framework.CustomNodeNoun = getCellValue(_FrameworkDataXLSX, "FRAMEWORK", "D2");            // set framework Custom node noun
+                    _Framework.CustomNodePluralNoun = getCellValue(_FrameworkDataXLSX, "FRAMEWORK", "E2");      // set framework Custom node plural noun
+                    _Framework.CustomFrameworkNoun = getCellValue(_FrameworkDataXLSX, "FRAMEWORK", "F2");       // set framework custom framework noun
+                }
+                else
+                {
+
+                    _Nodes.Add(new UoNodeModel());
+
+                    _Nodes[_Nodes.Count-1].Name = sheet.Name;
+
+                    _Nodes[_Nodes.Count-1].Position = j;
+                    j++;
+
+                    int i = 2;
+                    List<UoNodeModel> _ChildNodes = new List<UoNodeModel>();
+
+                    while(getCellValue(_FrameworkDataXLSX, sheet.Name, "A" + i) != "null")
+                    {
+                        
+
+                        _ChildNodes.Add(new UoNodeModel());
+
+                        _ChildNodes[_ChildNodes.Count-1].NodeCode = getCellValue(_FrameworkDataXLSX, sheet.Name, "A" + i);
+                        _ChildNodes[_ChildNodes.Count-1].NodeCode = string.Format("{0:0.0}", double.Parse(_ChildNodes[_ChildNodes.Count-1].NodeCode));
+
+                        _ChildNodes[_ChildNodes.Count-1].Name = getCellValue(_FrameworkDataXLSX, sheet.Name, "B" + i);
+                        _ChildNodes[_ChildNodes.Count-1].Position = i-1;
+                       // _ChildNodes[_ChildNodes.Count-1].ParentNode = _Nodes[_Nodes.Count-1];
+                        i++;
+                    }
+
+                    _Nodes[_Nodes.Count-1].ChildNodes = _ChildNodes;
+
+                
+                }
+
+            }
+            
+            _Framework.Nodes = _Nodes;
+
+            //===Get Level Categories===
+
+            ZipArchiveEntry _LevelCategoryData = zip.GetEntry(zipRoot + "TemplateInfo/LevelCategories.xlsx");
+            SpreadsheetDocument _LevelCateogoryXLSX = getSpreadSheetFromZip(_LevelCategoryData);
+
+
+            List<UoLevelCategoryModel> _LevelCategories = new List<UoLevelCategoryModel>();
+            List<UoLevelModel> _LevelModels = new List<UoLevelModel>();
+
+            
+
+            foreach(Sheet sheet in _LevelCateogoryXLSX.WorkbookPart.Workbook.Sheets)
+            {
+                j = 2;
+                _LevelCategories.Add(new UoLevelCategoryModel());
+                _LevelCategories[_LevelCategories.Count-1].Name = sheet.Name;
+
+                while(getCellValue(_LevelCateogoryXLSX, sheet.Name, "A" + j) != "null")
+                {
+                    _LevelModels.Add(new UoLevelModel());
+
+                    _LevelModels[_LevelModels.Count-1].Position = int.Parse(getCellValue(_LevelCateogoryXLSX, sheet.Name, "A" + j));
+                    _LevelModels[_LevelModels.Count-1].Name = getCellValue(_LevelCateogoryXLSX, sheet.Name, "B" + j);
+                    _LevelModels[_LevelModels.Count-1].LevelCategory = _LevelCategories[_LevelCategories.Count-1];
+                    j++;
+                }
+            }
+
             //===Get ProjectData===
 
             ZipArchiveEntry _ProjectData = zip.GetEntry(zipRoot + "ProjectData.xlsx"); // open ProjectData.xlsx
 
 
-
-            
-
             SpreadsheetDocument _ProjectDataXLSX = getSpreadSheetFromZip(_ProjectData);
-
 
             // get data from ProjectData
             _ProjectName = getCellValue(_ProjectDataXLSX, "ProjectData", "A2");
@@ -159,6 +251,31 @@ namespace UoN.AccrediTool.Web.Pages
                   
             }
 
+            //===Get Course list===
+            ZipArchiveEntry _CourseListData = zip.GetEntry(zipRoot + "CourseLists/ProgramCourseLists.xlsx"); 
+
+            SpreadsheetDocument _CourseListXLSX = getSpreadSheetFromZip(_CourseListData);
+
+
+
+            j=2;
+
+            while(getCellValue(_CourseListXLSX, "CourseListInfo", "A" + j) != "null")
+            {
+                _CourseListModels.Add(new UoCourseListModel());
+
+                _CourseListModels[_CourseListModels.Count-1].Position = int.Parse(getCellValue(_CourseListXLSX, "CourseListInfo", "A" + j));
+                _CourseListModels[_CourseListModels.Count-1].Name = getCellValue(_CourseListXLSX, "CourseListInfo", "B" + j);
+                _CourseListModels[_CourseListModels.Count-1].Major = getCellValue(_CourseListXLSX, "CourseListInfo", "C" + j);
+
+                _CourseListIds.Add(getCellValue(_CourseListXLSX, "CourseListInfo", "D" + j).Split(","));
+                j++;
+
+
+
+                
+            }
+
             // ===Get Course data===
             
             List<String> courseNames = new List<String>();
@@ -170,12 +287,11 @@ namespace UoN.AccrediTool.Web.Pages
 
                 if(regex.IsMatch(entry.FullName))
                 {
-                    courseNames.Add(entry.FullName.Substring(22).Remove(entry.FullName.Substring(22).Length -1));
+                    courseNames.Add(entry.FullName.Substring(8).Remove(entry.FullName.Substring(8).Length -1));
                 }
                 
             }
 
-            List<UoCourseModel> _CourseModels = new List<UoCourseModel>();
 
             foreach(String name in courseNames)
             {
@@ -218,19 +334,152 @@ namespace UoN.AccrediTool.Web.Pages
                     
                 }
 
+                
+
                 _CourseModels.Add(_Course);
 
 
             }
 
+            //TODO: Competency Mapping needs to be added
+            
+
+            //===get course instance data=== // TODO:
 
 
-            //===Post to api===
+
+
+
 
 
 
 
             
+        }
+
+        private void LinkTables()
+        {
+            //===link via linking tables===
+            String json = "";
+            //course to course-list
+
+            foreach(UoCourseModel course in _CourseModels)
+            {
+                for(int i = 0; i < _CourseListIds.Count; i++)
+                {
+                    foreach(String courseID in _CourseListIds[i])
+                    {
+                        if(courseID.Equals(course.Subject + course.CatalogNumber))
+                        {
+                            json = new JObject(new JProperty("courseListId", _CourseListModels[i].CourseListId),
+                                                new JProperty("courseId", course.CourseId)).ToString();
+                        }
+
+                    }
+                }
+
+                postJSON(json, "course-list-courses");
+                
+            }
+
+            //competencies to levels
+
+
+            //courses to competencies and levels
+
+            //Programs to Nodes to Levels
+        }
+
+        private void PostModels()
+        {
+            //===Post to api===
+
+            String json = "";
+
+            //Post framework
+            json = JsonConvert.SerializeObject(_Framework, Formatting.Indented);
+            _Framework = JsonConvert.DeserializeObject<UoFrameworkModel>(postJSON(json, "frameworks"));
+
+            //Post project
+            json = new JObject(new JProperty("name", _ProjectName), new JProperty("description", _ProjectDescription), new JProperty("frameworkId", _Framework.FrameworkId)).ToString();
+            postJSON(json, "projects");
+
+            //Post program
+            json = new JObject(new JProperty("programCode", _Program.ProgramCode), 
+                                new JProperty("name", _Program.Name),
+                                new JProperty("firstTermCode", _Program.FirstTermCode), 
+                                new JProperty("minUnits", _Program.MinUnits),
+                                new JProperty("duration", _Program.Duration), 
+                                new JProperty("maxYears", _Program.MaxYears),
+                                new JProperty("campusId", _Program.CampusId), 
+                                new JProperty("programCareerId", _Program.ProgramCareerId),
+                                new JProperty("fieldOfEducationId", _Program.FieldOfEducationId)).ToString();
+
+
+            _Program = JsonConvert.DeserializeObject<UoProgramModel>(postJSON(json, "programs"));
+
+            //Post course-list
+
+            for(int i = 0; i < _CourseListModels.Count; i++)
+            {
+                _CourseListModels[i].ProgramId = _Program.ProgramId;
+
+                json = new JObject(new JProperty("position", _CourseListModels[i].Position), 
+                                new JProperty("name", _CourseListModels[i].Name),
+                                new JProperty("major", _CourseListModels[i].Major), 
+                                new JProperty("programId",_CourseListModels[i].ProgramId)).ToString();
+
+                _CourseListModels[i] = JsonConvert.DeserializeObject<UoCourseListModel>(postJSON(json, "course-lists"));
+
+            }
+
+            //Post course
+
+            for(int i = 0; i < _CourseModels.Count; i++)
+            {
+                json = new JObject(new JProperty("subject", _CourseModels[i].Subject), 
+                    new JProperty("catalogNumber", _CourseModels[i].CatalogNumber),
+                    new JProperty("name", _CourseModels[i].Name), 
+                    new JProperty("description",_CourseModels[i].Description),
+                    new JProperty("units", _CourseModels[i].Units), 
+                    new JProperty("position", _CourseModels[i].Position),
+                    new JProperty("academicOrgId", _CourseModels[i].AcademicOrgId), 
+                    new JProperty("fieldOfEducationId",_CourseModels[i].FieldOfEducationId)).ToString();
+
+                _CourseModels[i] = JsonConvert.DeserializeObject<UoCourseModel>(postJSON(json, "courses"));
+                
+            }
+
+            //post level Categories
+
+            foreach(UoLevelCategoryModel levelCategoryModel in _LevelCategories)
+            {
+                postJSON(JsonConvert.SerializeObject(levelCategoryModel, Formatting.Indented), "level-categories"); // TODO: levels should be included here
+            }
+        }
+
+        private String postJSON(string json, string url)
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost:53924/api/" + url);
+
+            request.Method = "POST";
+            request.ContentType = "application/json";
+
+
+           // Console.WriteLine(json);
+
+            using (StreamWriter APIWriter = new StreamWriter(request.GetRequestStream()))
+            {
+                APIWriter.Write(json);
+            }
+
+  
+           
+            
+           StreamReader APIReader = new StreamReader(request.GetResponse().GetResponseStream());
+
+            return APIReader.ReadToEnd();
+
         }
 
         private String getJsonFromAPI(String url)
@@ -293,7 +542,7 @@ namespace UoN.AccrediTool.Web.Pages
             }
             else
             {
-                return "Cell not found";
+                return "null";
                 //cell not found error
             }
 

@@ -35,7 +35,7 @@ namespace UoN.AccrediTool.Core.Models
         #endregion
 
         #region Inverse navigation properties
-        public List<UoNodeModel> ChildNodes { get; } = new List<UoNodeModel>();
+        public List<UoNodeModel> ChildNodes { get; set;} = new List<UoNodeModel>();
         public bool ShouldSerializeChildNodes() { return ChildNodes.Count > 0; }
         #endregion
 
