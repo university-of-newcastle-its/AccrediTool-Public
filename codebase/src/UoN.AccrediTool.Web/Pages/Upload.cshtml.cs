@@ -11,9 +11,6 @@ using System.Net;
 using System.Linq;
 using System.Collections.Generic; 
 using System.Text.RegularExpressions;  
-using System;
-using System.Diagnostics;
-using System.IO;
 
 //OpenXML
 using DocumentFormat.OpenXml;
@@ -25,6 +22,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using UoN.AccrediTool.Core.Models;
+using UoN.AccrediTool.Core.Data;
 
 namespace UoN.AccrediTool.Web.Pages
 {
@@ -42,6 +40,7 @@ namespace UoN.AccrediTool.Web.Pages
         private String zipRoot = ""; 
 
         //=== vars from zip file===
+        public UoProjectModel _Project;
         public String _ProjectName {get; set;}
         public String _ProjectDescription {get; set;}
         public UoProgramModel _Program;
@@ -52,6 +51,8 @@ namespace UoN.AccrediTool.Web.Pages
         
         List<UoCourseModel> _CourseModels = new List<UoCourseModel>();
         List<UoLevelCategoryModel> _LevelCategories = new List<UoLevelCategoryModel>();
+        List<List<UoLevelCoursesJoin>> _LevelCourseJoin = new  List<List<UoLevelCoursesJoin>>();
+
 
 
         public async Task OnPostAsync()
@@ -85,6 +86,18 @@ namespace UoN.AccrediTool.Web.Pages
         private void proccessZip()
         {
 
+  
+
+            getModels();
+            postModels();
+            linkTables();
+
+
+   
+        }
+
+        private void getModels()
+        {
 
             //===Get FrameworkData===
 
@@ -148,15 +161,12 @@ namespace UoN.AccrediTool.Web.Pages
 
             ZipArchiveEntry _LevelCategoryData = zip.GetEntry(zipRoot + "TemplateInfo/LevelCategories.xlsx");
             SpreadsheetDocument _LevelCateogoryXLSX = getSpreadSheetFromZip(_LevelCategoryData);
-
-
-            List<UoLevelCategoryModel> _LevelCategories = new List<UoLevelCategoryModel>();
-            List<UoLevelModel> _LevelModels = new List<UoLevelModel>();
-
-            
+    
 
             foreach(Sheet sheet in _LevelCateogoryXLSX.WorkbookPart.Workbook.Sheets)
             {
+                List<UoLevelModel> _LevelModels = new List<UoLevelModel>();
+
                 j = 2;
                 _LevelCategories.Add(new UoLevelCategoryModel());
                 _LevelCategories[_LevelCategories.Count-1].Name = sheet.Name;
@@ -167,9 +177,10 @@ namespace UoN.AccrediTool.Web.Pages
 
                     _LevelModels[_LevelModels.Count-1].Position = int.Parse(getCellValue(_LevelCateogoryXLSX, sheet.Name, "A" + j));
                     _LevelModels[_LevelModels.Count-1].Name = getCellValue(_LevelCateogoryXLSX, sheet.Name, "B" + j);
-                    _LevelModels[_LevelModels.Count-1].LevelCategory = _LevelCategories[_LevelCategories.Count-1];
                     j++;
                 }
+
+                _LevelCategories[_LevelCategories.Count-1].Levels = _LevelModels;
             }
 
             //===Get ProjectData===
@@ -334,63 +345,87 @@ namespace UoN.AccrediTool.Web.Pages
                     
                 }
 
+                j = 2;
+                
+                
+
+                while(getCellValue(_CourseDataXLSX, "CompetencyMapping", "A" + j) != "null")
+                {
+                    
+                    UoNodeModel selectedNode = new UoNodeModel();
+                    String nodeCode = getCellValue(_CourseDataXLSX, "CompetencyMapping", "A" + j);
+
+                    nodeCode = string.Format("{0:0.0}", double.Parse(nodeCode));
+
+                    foreach(UoNodeModel node in _Framework.Nodes)
+                    {
+                        foreach(UoNodeModel childNode in node.ChildNodes)
+                        {
+                            
+                            if(childNode.NodeCode.Equals(nodeCode))
+                            {
+                                selectedNode = childNode;
+                                
+                            }
+                        }
+                    }
+
+                    int levelOfCapability = int.Parse(getCellValue(_CourseDataXLSX, "CompetencyMapping", "B" + j));
+
+
+                    foreach(UoLevelModel level in _LevelCategories[0].Levels)
+                    {
+                        if(levelOfCapability == level.Position)
+                        {
+                            UoLevelCoursesJoin courseJoin = new UoLevelCoursesJoin();
+                            courseJoin.Level = level;
+                            courseJoin.LevelId = level.LevelId;
+                            courseJoin.Node = selectedNode;
+                            courseJoin.NodeId = selectedNode.NodeId;
+                            courseJoin.Course = _Course;
+
+                            _Course.LevelCourses.Add(courseJoin);
+                        }
+                    }
+                    
+
+                    String[] impliedPedagogyArray = getCellValue(_CourseDataXLSX, "CompetencyMapping", "C" + j).Split(",");
+
+                    foreach(String impliedPedagogy in impliedPedagogyArray)
+                    {
+                        foreach(UoLevelModel level in _LevelCategories[1].Levels)
+                        {
+                            if(int.Parse(impliedPedagogy) == level.Position)
+                            {
+                                UoLevelCoursesJoin courseJoin = new UoLevelCoursesJoin();
+                                courseJoin.Level = level;
+                                courseJoin.LevelId = level.LevelId;
+                                courseJoin.Node = selectedNode;
+                                courseJoin.NodeId = selectedNode.NodeId;
+                                courseJoin.Course = _Course;
+
+                                _Course.LevelCourses.Add(courseJoin);
+                            }
+                        }
+                    }
+
+                    
+
+                    j++;
+                }
+                
+
                 
 
                 _CourseModels.Add(_Course);
-
+                _LevelCourseJoin.Add(_Course.LevelCourses);
 
             }
 
-            //TODO: Competency Mapping needs to be added
-            
-
-            //===get course instance data=== // TODO:
-
-
-
-
-
-
-
-
-
-            
         }
 
-        private void LinkTables()
-        {
-            //===link via linking tables===
-            String json = "";
-            //course to course-list
 
-            foreach(UoCourseModel course in _CourseModels)
-            {
-                for(int i = 0; i < _CourseListIds.Count; i++)
-                {
-                    foreach(String courseID in _CourseListIds[i])
-                    {
-                        if(courseID.Equals(course.Subject + course.CatalogNumber))
-                        {
-                            json = new JObject(new JProperty("courseListId", _CourseListModels[i].CourseListId),
-                                                new JProperty("courseId", course.CourseId)).ToString();
-                        }
-
-                    }
-                }
-
-                postJSON(json, "course-list-courses");
-                
-            }
-
-            //competencies to levels
-
-
-            //courses to competencies and levels
-
-            //Programs to Nodes to Levels
-        }
-
-        private void PostModels()
+        private void postModels()
         {
             //===Post to api===
 
@@ -402,7 +437,7 @@ namespace UoN.AccrediTool.Web.Pages
 
             //Post project
             json = new JObject(new JProperty("name", _ProjectName), new JProperty("description", _ProjectDescription), new JProperty("frameworkId", _Framework.FrameworkId)).ToString();
-            postJSON(json, "projects");
+            _Project = JsonConvert.DeserializeObject<UoProjectModel>(postJSON(json, "projects"));
 
             //Post program
             json = new JObject(new JProperty("programCode", _Program.ProgramCode), 
@@ -452,10 +487,142 @@ namespace UoN.AccrediTool.Web.Pages
 
             //post level Categories
 
-            foreach(UoLevelCategoryModel levelCategoryModel in _LevelCategories)
+            for(int i = 0; i < _LevelCategories.Count; i++)
             {
-                postJSON(JsonConvert.SerializeObject(levelCategoryModel, Formatting.Indented), "level-categories"); // TODO: levels should be included here
+                _LevelCategories[i] =  JsonConvert.DeserializeObject<UoLevelCategoryModel>(postJSON(JsonConvert.SerializeObject(_LevelCategories[i], Formatting.Indented), "level-categories"));
+                
+                for(int j = 0; j < _LevelCategories[i].Levels.Count; j++)
+                {
+                    json = new JObject(new JProperty("position", _LevelCategories[i].Levels[j].Position), 
+                        new JProperty("name", _LevelCategories[i].Levels[j].Name),
+                        new JProperty("description", _LevelCategories[i].Levels[j].Description),  
+                        new JProperty("levelCategoryId",_LevelCategories[i].LevelCategoryId)).ToString();
+
+                    _LevelCategories[i].Levels[j] = JsonConvert.DeserializeObject<UoLevelModel>(postJSON(json, "levels"));
+                }
+
             }
+
+
+        }
+
+        
+        private void linkTables()
+        {
+            //===link via linking tables===
+            String json = "";
+            //course to course-list
+
+            foreach(UoCourseModel course in _CourseModels)
+            {
+                for(int i = 0; i < _CourseListIds.Count; i++)
+                {
+                    foreach(String courseID in _CourseListIds[i])
+                    {
+                        if(courseID.Equals(course.Subject + course.CatalogNumber))
+                        {
+                            json = new JObject(new JProperty("courseListId", _CourseListModels[i].CourseListId),
+                                                new JProperty("courseId", course.CourseId)).ToString();
+                        }
+
+                    }
+                }
+
+                postJSON(json, "course-list-courses");
+                
+            }
+
+            //competencies to levels
+
+            foreach(UoLevelCategoryModel categoryModel in _LevelCategories)
+            {
+                foreach(UoNodeModel node in _Framework.Nodes)
+                {
+                    json = new JObject(new JProperty("levelCategoryId", categoryModel.LevelCategoryId),
+                                        new JProperty("nodeId", node.NodeId)).ToString();
+
+                    postJSON(json, "level-category-nodes");
+
+                    foreach(UoNodeModel childNode in node.ChildNodes)
+                    {
+                        json = new JObject(new JProperty("levelCategoryId", categoryModel.LevelCategoryId),
+                                        new JProperty("nodeId", childNode.NodeId)).ToString();
+
+                        postJSON(json, "level-category-nodes");
+                    }
+                }
+
+
+            }
+
+            //courses to competencies and levels
+            //level-courses
+
+            int levelId = -1;
+            int nodeId = -1;
+            int courseId = -1;
+
+            foreach(List<UoLevelCoursesJoin> courseJoinList in _LevelCourseJoin)
+            {
+                foreach(UoLevelCoursesJoin courseJoin in courseJoinList) // for each course to join
+                {
+
+                    //get level ID
+                    foreach(UoLevelCategoryModel categoryModel in _LevelCategories)
+                    {
+                        foreach(UoLevelModel levelModel in categoryModel.Levels)
+                        {
+                            if(levelModel.Name.Equals(courseJoin.Level.Name))
+                            {
+                                levelId = levelModel.LevelId;
+                            }
+                        }
+                    }
+
+                    //get node
+                    foreach(UoNodeModel node in _Framework.Nodes)
+                    {
+                        foreach(UoNodeModel childNode in node.ChildNodes)
+                        {
+                            if(childNode.NodeCode.Equals(courseJoin.Node.NodeCode))
+                            {
+                                nodeId = childNode.NodeId;
+                            }
+                        }
+                    }
+
+                    //get course
+                    foreach(UoCourseModel courseModel in _CourseModels)
+                    {
+                        if (courseModel.Name.Equals(courseJoin.Course.Name))
+                        {
+                            courseId = courseModel.CourseId;
+                        }
+                    }
+
+
+
+                    json = new JObject(new JProperty("courseId", courseId),
+                        new JProperty("levelId", levelId),
+                        new JProperty("nodeId", nodeId)).ToString(); 
+                
+                    postJSON(json, "level-courses");
+
+                }
+
+                
+
+
+            }
+
+
+            //Programs to Nodes to Levels
+
+              json = new JObject(new JProperty("programId", _Program.ProgramId),
+                    new JProperty("projectId", _Project.ProjectId)).ToString();
+
+            postJSON(json, "project-programs");
+
         }
 
         private String postJSON(string json, string url)
@@ -546,6 +713,11 @@ namespace UoN.AccrediTool.Web.Pages
                 //cell not found error
             }
 
+        }
+
+        public String getLink()
+        {
+            return "http://localhost:53924/api/programs/" +_Program.ProgramId + "/view?projectId="+_Project.ProjectId +"&template=" + _Framework.TemplateName;
         }
     }
 }

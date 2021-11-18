@@ -21,7 +21,7 @@ namespace UoN.AccrediTool.Core.Models
         #endregion
 
         #region Inverse navigation properties
-        public List<UoLevelModel> Levels { get; } = new List<UoLevelModel>();
+        public List<UoLevelModel> Levels { get; set; } = new List<UoLevelModel>();
         public bool ShouldSerializeLevels() { return Levels.Count > 0; }
         #endregion
 
