@@ -36,15 +36,11 @@ namespace UoN.AccrediTool.Web.Pages.Account
             string loginId = User.Claims.FirstOrDefault(x => x.Type.Equals(IdClaimType, StringComparison.OrdinalIgnoreCase))?.Value;
             _logger.LogInformation("{0} - User {1} logging out, login id {2}", Activity.Current?.Id ?? HttpContext.TraceIdentifier, User.Identity.Name, loginId);
 
-            return SignOut
-            (
-                new AuthenticationProperties { RedirectUri = _Configuration["Okta:PostLogoutRedirectUri"] },
-                new[]
-                {
-                    OpenIdConnectDefaults.AuthenticationScheme,
-                    CookieAuthenticationDefaults.AuthenticationScheme
-                }
-            );
+            SignOutResult SignOut = new SignOutResult(
+              new AuthenticationProperties { RedirectUri = _Configuration["Okta:PostLogoutRedirectUri"] });
+
+            return SignOut;
+
         }
     }
 }

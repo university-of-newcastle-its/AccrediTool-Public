@@ -16,6 +16,8 @@ using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using System.Security.Claims;
 using System.Globalization;
 
+using Microsoft.IdentityModel.Logging;
+
 using UoN.AccrediTool.Core.Security;
 
 namespace UoN.AccrediTool.Web
@@ -32,10 +34,14 @@ namespace UoN.AccrediTool.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            IdentityModelEventSource.ShowPII = true; //TODO:
+
             services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                
             })
             .AddCookie()
             .AddOpenIdConnect(options =>
@@ -63,12 +69,19 @@ namespace UoN.AccrediTool.Web
                     ValidateIssuer = true
                 };
 
-                options.RequireHttpsMetadata = false; // FOR DEV ONLY
+
+                
+                //options.RequireHttpsMetadata = false; // NOTE: FOR DEV ONLY. remove in prod
+                
+                
+                
+
             });
 
             services.AddAuthorization();
             services.AddRazorPages();
-
+            services.AddMvc();
+            services.AddAntiforgery(o => o.HeaderName = "XSRF-TOKEN");
         }
 
         /// <summary>
@@ -123,6 +136,8 @@ namespace UoN.AccrediTool.Web
             {
                 endpoints.MapRazorPages();
             });
+
+            
         }
     }
 }

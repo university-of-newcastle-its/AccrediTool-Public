@@ -1,0 +1,376 @@
+﻿@page
+@model UoN.AccrediTool.Web.Pages.NewProject.Course.AddCourseModel
+@{
+}
+@Html.AntiForgeryToken()
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+
+    let numOfCourseMappings = 0;
+
+    function formValidation()
+    {
+        let form = document.AddCourseForm;
+
+        let isValid = true;
+
+
+        if(isValid)
+        {
+            form.submit()
+        }
+    }
+
+    function IncrementCourseMappings()
+    { 
+        numOfCourseMappings++;
+    }
+
+    function getURL()
+    {
+         return window.location.href
+    }
+
+    function insertResponse(response)
+    {
+        document.getElementById("Mapping").insertAdjacentHTML("beforeend", response);
+    }
+
+    function toggleTaught(index)
+    {
+
+        taughtElement = document.getElementById("courseMappings[" + index + "].Taught");
+
+        taughtCircleCross = document.getElementById("Taught_CircleCross_" + index);
+        taughtCheckmark = document.getElementById("Taught_Checkmark_" + index);
+
+        if(taughtElement.value == "true")
+        {
+            taughtElement.value = "false";
+
+            taughtCheckmark.className = "hidden text-gray-500";
+            taughtCircleCross.className = "";
+        }
+        else
+        {
+            taughtElement.value = "true";
+
+            taughtCheckmark.className = "text-gray-500";
+            taughtCircleCross.className = "hidden";
+        }
+   
+
+    }
+
+    function togglePracticed(index)
+    {
+        PracticedElement = document.getElementById("courseMappings[" + index + "].Practiced");
+
+        practicedCircleCross = document.getElementById("Practiced_CircleCross_" + index);
+        practicedCheckmark = document.getElementById("Practiced_Checkmark_" + index);
+
+        if(PracticedElement.value == "true")
+        {
+            PracticedElement.value = "false";
+
+            practicedCheckmark.className = "hidden text-gray-500";
+            practicedCircleCross.className = "";
+        }
+        else
+        {
+            PracticedElement.value = "true";
+
+            practicedCheckmark.className = "text-gray-500";
+            practicedCircleCross.className = "hidden";
+        }
+    }
+
+
+    function toggleAssessed(index)
+    {
+        assessedElement = document.getElementById("courseMappings[" + index + "].Assessed");
+
+        assessedCircleCross = document.getElementById("Assessed_CircleCross_" + index);
+        assessedCheckmark = document.getElementById("Assessed_Checkmark_" + index);
+
+        if(assessedElement.value == "true")
+        {
+            assessedElement.value = "false";
+
+            assessedCheckmark.className = "hidden text-gray-500";
+            assessedCircleCross.className = "";
+        }
+        else
+        {
+            assessedElement.value = "true";
+
+            assessedCheckmark.className = "text-gray-500";
+            assessedCircleCross.className = "hidden";
+        }
+    }
+
+    function insertNodeResponse(response, index)
+    {
+        nodeDescription = document.getElementById("Node_Description_" + index);
+
+        nodeDescription.innerHTML = response
+    }
+
+    function updateDescription(index)
+    {
+        nodeSelect = document.getElementById("courseMappings[" + index + "].NodeId");
+        
+        nodeDescription = document.getElementById("Node_Description_" + index);
+
+        if(nodeSelect.options[nodeSelect.selectedIndex].value == "-1")
+        {
+            nodeDescription.innerHTML = "Please select a Competency from the dropdown menu. For a more detailed descriptions of all the competencies <b class=\"cursor-pointer\" onclick=\"openCompList()\"> Click Here</b>.";
+        }
+        else
+        {
+            $.ajax({
+                type: "POST",
+                url: "AddCourse?handler=GetNodeDescription",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("XSRF-TOKEN",
+                        $('input:hidden[name="__RequestVerificationToken"]').val());
+                },
+                data: JSON.stringify({
+                    num: nodeSelect.options[nodeSelect.selectedIndex].value
+                }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "text",
+                success: function(response){
+                        insertNodeResponse(response, index);
+                }                
+            });
+        }
+    
+    }
+
+    function openCompList()
+    {
+         window.open("/View/Competencies?frameworkId=" + @Model.frameworkId).focus();
+    }
+
+    function removeSelected()
+    {
+        for(let i = 0; i < numOfCourseMappings; i++ )
+        {
+            if(document.getElementById("Mapping_Selected_" + i) !=null)
+            {
+                if(document.getElementById("Mapping_Selected_" + i).checked)
+                {
+                     document.getElementById("CourseMapping_Num_" + i).innerHTML = "<input type=\"hidden\" name=\"courseMappings[" + i + "].NodeId\" id=\"courseMappings[" + i + "].NodeId\" value=\"-1\">";
+                }
+    
+            }
+        }
+    
+    }
+
+    function getFieldOfEdu()
+    {
+        $.ajax({
+            type: "POST",
+            url: "AddCourse?handler=GetFieldOfEdu",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("XSRF-TOKEN", 
+                $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            dataType: "json",
+            success: function(response) {
+                if(document.getElementById("CourseModel_FieldOfEducationId").length == 1)
+                {
+                    let fieldOfEduList = new Map();
+
+                    for(let i = 0; i < response.length; i++)
+                    {
+                        if(!fieldOfEduList.has(response[i].name))
+                        {
+                            fieldOfEduList.set(response[i].name, response[i].id);
+                        }
+                    }
+
+                    fieldOfEduList.forEach(function (value, key) {
+                        var option = document.createElement("option");
+                        option.text = key;
+                        option.value = value;
+                        document.getElementById("CourseModel_FieldOfEducationId").add(option);
+
+                    });
+
+                }
+            }
+        });
+    }
+
+    function getAcademicOrg()
+    {
+        $.ajax({
+            type: "POST",
+            url: "AddCourse?handler=GetAcademicOrg",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("XSRF-TOKEN", 
+                $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            dataType: "json",
+            success: function(response) {
+
+                if(document.getElementById("CourseModel_AcademicOrgId").length == 1)
+                {
+                    let academicList = new Map();
+
+                    for(let i = 0; i < response.length; i++)
+                    {   
+                        if(!academicList.has(response[i].name))
+                        {
+                            academicList.set(response[i].name, response[i].id);
+                        }
+                        
+                    }
+
+                    academicList.forEach(function (value, key) {
+                        var option = document.createElement("option");
+                        option.text = key;
+                        option.value = value;
+                        document.getElementById("CourseModel_AcademicOrgId").add(option);
+
+                    });
+
+                }
+
+
+            }
+            
+        });
+
+    }
+
+
+    $(document).ready(function(){
+        $("#CourseMapping").click(function(){
+            $.ajax({
+                type: "POST",
+                url: "AddCourse?handler=AddMapping",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("XSRF-TOKEN",
+                        $('input:hidden[name="__RequestVerificationToken"]').val());
+                },
+                data: JSON.stringify({
+                        num: numOfCourseMappings,
+                        projectId: @Model.projectId
+                    }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                success: function(response){
+                        insertResponse(response);
+                }
+        });
+        IncrementCourseMappings();
+      });
+    
+
+      
+    });
+
+
+</script>
+
+<section class="py-4">
+ <form method="POST" enctype="multipart/form-data" asp-page-handler="submit" name="AddCourseForm">
+
+<input type="hidden" asp-for="programId" value="@Model.programId">
+<input type="hidden" asp-for="Year" value="@Model.Year">
+<input type="hidden" asp-for="Semester" value="@Model.Semester">
+<input type="hidden" asp-for="Pos" value="@Model.Pos">
+<input type="hidden" asp-for="projectId" value="@Model.projectId">
+<input type="hidden" asp-for="CourseListJson" value="@Model.CourseListJson">
+<input type="hidden" asp-for="LevelCategoryJson" value="@Model.LevelCategoryJson">
+
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+
+
+            <br>
+
+        
+
+            <div class="grid grid-cols-2 gap-x-6 gap-y-2">
+                
+                    <label>Course Name: </label>
+                    <label>Course Code: </label>
+                    
+                    <input type="text" asp-for="CourseModel.Name" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300"> 
+                    <input type="text" asp-for="CourseCode" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300">  
+            </div>
+
+            <div class="grid grid-cols-1">
+                <label> Description: </label>
+                <textarea type="text" asp-for="CourseModel.Description" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300 col-span-full h-56"></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-x-6 gap-y-2">
+                <label>Units: </label>
+                <label>Academic Org: </label>
+                <input type="text" asp-for="CourseModel.Units" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300">
+                <select asp-for="CourseModel.AcademicOrgId" class="" onclick="getAcademicOrg()">
+                    <option value="">Academic Org</option>
+
+
+
+                </select>
+
+                <label class="col-span-full">Field Of Education: </label>
+                @* <input type="text" asp-for="CourseModel.FieldOfEducation" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300"> *@
+                <select asp-for="CourseModel.FieldOfEducationId" class="" onclick="getFieldOfEdu()">
+                    <option value="">Field Of Education</option>
+
+
+                </select>
+            </div>
+
+            
+
+
+                
+            
+
+
+        </div>
+    </div>
+    <br>
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="border-b border-gray-200 px-4 py-5 sm:px-6 grid grid-cols-10 gap-x-24 gap-y-2">
+            <h2 class="justify-start col-span-6"> Mapping </h2>
+
+            <div class="col-span-4 grid grid-cols-10 gap-x-6">
+                
+                <h2 id="CourseMapping" class="justify-end cursor-pointer border border-gray-400 hover:border-sky-700 uppercase rounded-lg px-3 bg-gray-200 align-middle col-span-4 text-center">Add Mapping</h2>
+                <h2 id="RemoveCourseMapping" class="cursor-pointer border border-gray-400 hover:border-sky-700 uppercase rounded-lg px-3 bg-gray-200 align-middle col-span-6 text-center" onclick="removeSelected()">Remove Selected Mapping</h2>
+
+            </div>
+
+        </div>
+
+        <div class="px-4 py-5 sm:p-6" id="Mapping">
+            <div class="grid grid-cols-10 w-90 h-12 border-b border-gray-200 bg-gray-50">
+                <h2 class="px-6 py-3 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider col-span-6 bg-gray-50 align-middle">Element of Competency</h2>
+                <h2 class="px-6 py-3 text-centre text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider bg-gray-50 align-middle">Taught</h2>
+                <h2 class="px-6 py-3 text-centre text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider bg-gray-50 align-middle">Practiced</h2>
+                <h2 class="px-6 py-3 text-centre text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider bg-gray-50 align-middle">Assessed</h2>
+                <h2 class="px-6 py-3 text-centre text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider bg-gray-50 align-middle">Level</h2>
+            </div>
+        </div>
+    </div>
+     <br>
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="border-b border-gray-200 px-4 py-3 sm:px-6 h-12 align-middle">
+             <button type="submit" value="Submit" class="float-right border border-gray-400 hover:border-sky-700 uppercase rounded-lg px-3 bg-gray-200 align-middle text-right" onlclick="formValidation" >Submit</button>
+        </div>
+     </div>
+
+    </form>
+
+</section>

@@ -1,0 +1,142 @@
+﻿@page
+@model UoN.AccrediTool.Web.Pages.NewProject.Course.AddCourseInstanceModel
+@{
+}
+<script>
+
+    let AssesmentPos = 0;
+    let LearningPos = 0;
+
+    function AddAssesment() {
+
+        let HTML = "<h2>Assesment Number: " + (AssesmentPos+1) + "</h2>";
+
+        HTML = HTML + "<div class=\"grid grid-cols-2  gap-x-6 gap-y-2\"><label>Name:</label> <label>Weight:</label>";
+
+        HTML = HTML + "<input type=\"text\" name=\"assessmentModels[" + AssesmentPos + "].Name\" class=\"rounded-lg border-solid border-2 border-black-500 focus:border-blue-300\">";
+        HTML = HTML + "<input type=\"text\" name=\"assessmentModels[" + AssesmentPos + "].Weight\" class=\"rounded-lg border-solid border-2 border-black-500 focus:border-blue-300\">";
+
+        HTML = HTML + "</div><br>";
+
+
+        HTML = HTML + "<div class=\"grid grid-cols-1  gap-x-6 gap-y-2\">";
+        
+        HTML = HTML + "<label>Assessment Type: </label>";
+        HTML = HTML + "<select name=\"assessmentModels[" + AssesmentPos + "].AssessmentTypeId\"  class=\"rounded-lg border-solid border-2 border-black-500 focus:border-blue-300\">";
+        
+        @for (int i = 0; i < @Model.AssessmentTypeModels.Count; i++)
+        {
+            @Html.Raw("HTML = HTML + \"<option value =" + @Model.AssessmentTypeModels[i].AssessmentTypeId + ">" + @Model.AssessmentTypeModels[i].Name + "</option>\"; \n")
+    
+        }
+
+        HTML = HTML + "</select>";
+        HTML = HTML + "<br><label>Purpose: </label>";
+        HTML = HTML + "<textarea name=\"assessmentModels[" + AssesmentPos + "].Purpose\" type=\"text\" class=\"rounded-lg border-solid border-2 border-black-500 focus:border-blue-300 col-span-full h-36\"> </textarea>";
+
+
+        HTML = HTML + "</div><br>";
+        HTML = HTML + "";
+
+        document.getElementById("Assessments").insertAdjacentHTML("beforeend", HTML);
+                
+        AssesmentPos++;
+    }
+
+    function AddLearningOutcome() {
+
+        let HTML = "<h2>Learning Outcome Number: " + (LearningPos + 1) + " </h2>"
+                
+        HTML = HTML + "<div class=\"grid grid-cols-1  gap-x-6 gap-y-2\">";
+        HTML = HTML + "<label>Name</label>";
+        HTML = HTML + "<input type=\"text\" name=\"learningOutcomeModels[" + LearningPos + "].Name\" class=\"rounded-lg border-solid border-2 border-black-500 focus:border-blue-300\">";
+        HTML = HTML + "</div><br>";
+
+        
+        document.getElementById("LearningOutcomes").insertAdjacentHTML("beforeend", HTML);
+
+
+        LearningPos++
+    }
+
+</script>
+
+<section class="py-4">
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+            <h1>Add a instance of the course: @Model.CourseModel.Name</h1><hr>
+
+            <form  method="POST" enctype="multipart/form-data">
+
+
+
+
+                <div class="grid grid-cols-2 gap-x-6 gap-y-2">
+                    <label>Year:</label>
+                    <label>Semester:</label>
+                    <input type="text" asp-for="CourseInstanceModel.Year" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300">
+                    
+                    <select asp-for="Semester"  class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300">
+                        <option value="40">Semester 1</option>
+                        <option value="80">Semester 2</option>
+                        <option value="25">Trimester 1</option>
+                        <option value="55">Trimester 2</option>
+                        <option value="85">Trimester 3</option>
+                        <option value="0">Summer 1</option>
+                        <option value="11">Summer 2</option>
+                        <option value="60">Winter</option>
+                        <option value="91">Quarter 1</option>
+                        <option value="92">Quarter 2</option>
+                        <option value="93">Quarter 3</option>
+                        <option value="94">Quarter 4</option>
+                        <option value="1">ELICOS Session 1</option>
+                        <option value="2">ELICOS Session 2</option>
+                        <option value="3">ELICOS Session 3</option>
+                        <option value="4">ELICOS Session 4</option>
+                        <option value="5">ELICOS Session 5</option>
+                        <option value="6">ELICOS Session 6</option>
+                        <option value="7">ELICOS Session 7</option>
+                        <option value="8">ELICOS Session 8</option>
+                        <option value="9">ELICOS Session 9</option>
+                        <option value="15">Trimester 1 (Singapore)</option>
+                        <option value="45">Trimester 2 (Singapore)</option>
+                        <option value="75">Trimester 3 (Singapore)</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-1 gap-x-6 gap-y-x">
+                    <label>Campus:</label>
+
+                    <select asp-for=" CourseInstanceModel.CampusId"  class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300">
+
+                        @for(int i = 0; i < @Model.CampusModels.Count; i++)
+                        {
+                            <option value ="@Model.CampusModels[i].CampusId">@Model.CampusModels[i].Name</option>
+                        }
+
+                    </select>
+
+
+                </div>
+                <hr>
+                    
+                    <a onclick="AddAssesment()">Add Assesments</a>
+                    <div id="Assessments">
+
+                    </div>
+
+                <hr>
+                    <a onclick="AddLearningOutcome()">Add Learning Outcomes</a>
+                    <div id="LearningOutcomes" class="grid grid cols-2">
+
+                    </div>
+
+
+               
+                <button type="submit" value="Submit" >submit</button>
+
+            </form>
+
+        </div>
+    </div>
+</section>

@@ -1,5 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 
 using UoN.AccrediTool.Core.Data;
 
@@ -11,6 +14,13 @@ namespace UoN.AccrediTool.Core.Repositories
         public UoLevelCategoryNodesRepository(DataContext context)
         {
             _context = context;
+        }
+
+        public List<UoLevelCategoryNodesJoin> GetAllLevelCategoryNodesJoins()
+        {
+            List<UoLevelCategoryNodesJoin> levelCategoryNodes = _context.LevelCategoryNodes.ToList();
+            return levelCategoryNodes;
+
         }
 
         public async Task<int?> AddLevelCategoryNodes(UoLevelCategoryNodesJoin levelCategoryNodes)

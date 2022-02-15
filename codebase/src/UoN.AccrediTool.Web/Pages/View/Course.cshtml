@@ -1,0 +1,136 @@
+﻿@page
+@model UoN.AccrediTool.Web.Pages.View.CourseModel
+@{
+}
+
+
+<section class="py-4">
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+            <h2 class="text-lg leading-6 font-medium text-gray-900">
+                @Model.courseModel.GetCourseCode()
+            </h2>
+
+            <p class="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
+                @Model.courseModel.Name
+            </p>
+        </div>
+            <div class="px-4 py-5 sm:px-6">
+            <div class="grid grid-cols-1 col-gap-4 row-gap-8 sm:grid-cols-2 -mb-3">
+
+                @if(Model.courseModel.FieldOfEducation != null)
+                {
+                    <dl class="sm:col-span-1 pb-3">
+                        <dt class="text-sm leading-5 font-medium text-gray-500">
+                            Field of Education
+                        </dt>
+                        <dd class="mt-1 text-sm leading-5 text-gray-900">
+                            @Model.courseModel.FieldOfEducation.Name
+                        </dd>
+                    </dl>
+                }
+
+                @if(Model.courseModel.Units != null)
+                {
+                
+                    <dl class="sm:col-span-1 pb-3">
+                        <dt class="text-sm leading-5 font-medium text-gray-500">
+                            Units
+                        </dt>
+                        <dd class="mt-1 text-sm leading-5 text-gray-900">
+                            @Model.courseModel.Units
+                        </dd>
+                    </dl>
+                
+                }
+
+
+                @if(Model.courseModel.AcademicOrg != null)
+                {
+                    <dl class="sm:col-span-1 pb-3">
+                        <dt class="text-sm leading-5 font-medium text-gray-500">
+                            Managing school
+                        </dt>
+                        <dd class="mt-1 text-sm leading-5 text-gray-900">
+                            @Model.courseModel.AcademicOrg.Name
+                        </dd>
+                    </dl>
+                
+                }
+
+
+
+
+                <dl class="sm:col-span-1 pb-3">
+                    <dt class="text-sm leading-5 font-medium text-gray-500">
+                        Level
+                    </dt>
+                    <dd class="mt-1 text-sm leading-5 text-gray-900">
+                        @Model.courseModel.GetLevel() (@Model.courseModel.GetLevelName())
+                    </dd>
+                </dl>
+                
+                
+
+
+
+                @if (Model.courseModel.Description != null)
+                {
+                    <dl class="sm:col-span-2 pb-3">
+                        <dt class="text-sm leading-5 font-medium text-gray-500">
+                            Description
+                        </dt>
+                        <dd class="mt-1 text-sm leading-5 text-gray-900">
+                            @Model.courseModel.Description
+                        </dd>
+                    </dl>
+                }
+
+
+                @if (Model.courseModel.CourseInstances.Count > 0)
+                {
+                    <dl class="sm:col-span-2 pb-3">
+                        <dt class="text-sm leading-5 font-medium text-gray-500">
+                            Instances
+                        </dt>
+                        <dd class="mt-1 text-sm leading-5 text-gray-900">
+                            <ul class="border border-gray-200 rounded-md">
+                                @for (int ix1 = 0; ix1 < Model.courseModel.CourseInstances.Count; ix1++)
+                                {
+                                    var courseInstance = Model.courseModel.CourseInstances[ix1];
+                                    <li class="pl-3 pr-4 py-3 flex items-center justify-between text-sm leading-5@(ix1 != Model.courseModel.CourseInstances.Count - 1 ? " border-b border-gray-200" : "")">
+                                        <div class="whitespace-no-wrap ml-2 w-0 flex-1">
+                                            <span class="font-semibold">@courseInstance.Year @courseInstance.GetTerm()</span>
+                                            <span> - @courseInstance.Campus.Name</span>
+                                        </div>
+                                        <div class="ml-4 flex-shrink-0 flex items-center">
+                                            @if ((bool)ViewData["IsStatic"])
+                                            {
+                                                <a class="truncate font-medium underline text-indigo-600 hover:text-indigo-900" href="course-instance-@(courseInstance.CourseInstanceId).aspx">
+                                                    View<div class="hidden sm:inline"> course instance</div>
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <a class="truncate font-medium underline text-indigo-600 hover:text-indigo-900"
+                                                   asp-controller="UoCourseInstance" asp-action="GetView" asp-route-id="@courseInstance.CourseInstanceId" asp-route-projectId="@ViewData["ProjectId"]" asp-route-template="@ViewData["Template"]">
+                                                    View<div class="hidden sm:inline"> course instance</div>
+                                                </a>
+                                            }
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </dd>
+                    </dl>
+                }
+
+
+            </div>
+        </div>
+
+
+        </div>
+
+    </div>
+</section>

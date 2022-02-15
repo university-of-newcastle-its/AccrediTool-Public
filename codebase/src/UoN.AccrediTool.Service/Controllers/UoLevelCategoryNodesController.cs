@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 
 using UoN.AccrediTool.Core.Data;
 using UoN.AccrediTool.Core.Repositories;
@@ -28,6 +29,33 @@ namespace UoN.AccrediTool.Service.Controllers
             _logger = logger;
             Repository = new UoLevelCategoryNodesRepository(_context);
         }
+
+
+        #region GET: api/level-category-nodes
+        [HttpGet]
+        [Produces(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public ActionResult<List<UoLevelCategoryNodesJoin>> Get()
+        {
+            string method = "Get";
+            string traceId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+            _logger.LogInformation("{0} - Web API - Controller: {1}, Method: {2}, User: {3}", traceId, controllerName, method, User.Identity.Name);
+
+            List<UoLevelCategoryNodesJoin> levelCategoryNodesJoins = Repository.GetAllLevelCategoryNodesJoins();
+
+            if(levelCategoryNodesJoins == null)
+            {
+                return NoContent();
+            }
+            else
+            {
+                return levelCategoryNodesJoins;
+            }
+               
+
+            
+        }
+        #endregion
 
         #region POST: api/level-category-nodes
         [HttpPost]

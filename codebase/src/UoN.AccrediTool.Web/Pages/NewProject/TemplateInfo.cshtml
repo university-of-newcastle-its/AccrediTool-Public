@@ -1,0 +1,191 @@
+@page 
+@model TemplateInfoModel
+
+<script>
+    function formValidation()
+    {
+        let form = document.TemplateInfoForm;
+        
+        let isValid = true;
+
+        if (form["FrameworkModel.Name"].value == "")
+        {
+            form["FrameworkModel.Name"].className = "rounded-lg border-solid border-2 border-red-600 focus:border-red-300"
+            isValid = false;
+        }
+        else
+        {
+            form["FrameworkModel.Name"].className = "rounded-lg border-solid border-2 border-black-500 focus:border-blue-300"
+        }
+
+        if (form["FrameworkModel.TemplateName"].value == "")
+        {
+            form["FrameworkModel.TemplateName"].className = "rounded-lg border-solid border-2 border-red-600 focus:border-red-300"
+            isValid = false;
+        }
+        else
+        {
+            form["FrameworkModel.TemplateName"].className = "rounded-lg border-solid border-2 border-black-500 focus:border-blue-300"
+        }
+
+        if (form["FrameworkModel.Description"].value == "")
+        {
+            form["FrameworkModel.Description"].className = "rounded-lg border-solid border-2 border-red-600 focus:border-red-300 col-span-full h-56"
+            isValid = false;
+        }
+        else
+        {
+            form["FrameworkModel.Description"].className = "rounded-lg border-solid border-2 border-black-500 focus:border-blue-300 col-span-full h-56"
+        }
+
+        if(isValid)
+        {
+            form.submit();
+        }
+        else
+        {
+            document.getElementById("formError").className = "text-red-600"
+        }
+    }
+
+
+</script>
+
+<section class="py-4">
+    <form method="POST" enctype="multipart/form-data" asp-page-handler="submit" name="TemplateInfoForm">
+
+    <input type="hidden" asp-for="LevelCategoryJson" value="@Model.LevelCategoryJson">
+    <input type="hidden" asp-for="programId" value="@Model.programId">
+
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+                <h1>Create new project. Add template infomation</h1>
+                <hr>
+                
+
+
+                        <h2>Create new Framwork</h2>
+                        <div class="grid grid-cols-2 gap-x-6 gap-y-3">
+                            <label for="FramworkModelName">Name: </label>
+                            <label for="FrameworkModel.TemplateName"> Template name:</label>
+                            <input type="text" asp-for="FrameworkModel.Name" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300">
+                            <input type="text" asp-for="FrameworkModel.TemplateName" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300">
+
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-x-6 gap-y-3"> 
+                            <label for="">Descritpion: </label>
+                            <textarea type="text" asp-for="FrameworkModel.Description" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300 col-span-full h-56"></textarea>
+
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-x-6 gap-y-3">
+
+                            <input type="text" asp-for="FrameworkModel.CustomNodeNoun" class="hidden" value="Element of Competency">
+                            <input type="text" asp-for="FrameworkModel.CustomNodePluralNoun" class="hidden" value="Element of Competency">
+
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-x-6 gap-y-3"> 
+                            <input type="text" asp-for="FrameworkModel.CustomFrameworkNoun" class="hidden" value="Competencies">
+                        </div>
+                   
+                    
+
+
+            </div>
+        </div>
+        <br>
+
+
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+                <h2 class="justify-start"> Competencies in this framework. </h2>
+            </div>
+            <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+                        @for(int i = 0; i < @Model.FrameworkModel.Nodes.Count; i++)
+                        {
+                            <div class="grid grid-cols-10 border border-gray-400">
+                                <h3 class="col-span-10">@Model.FrameworkModel.Nodes[i].Name</h3>
+
+                                <h4 class="col-span-1 border-r border-t border-gray-400">Node Code</h4>
+                                <h4 class="col-span-9 border-t border-gray-400">Description</h4>
+
+                                @for(int j = 0; j < @Model.FrameworkModel.Nodes[i].ChildNodes.Count; j++)
+                                {
+                                    <div class="col-span-1 border-t border-r border-gray-400">
+                                        <p>@Model.FrameworkModel.Nodes[i].ChildNodes[j].NodeCode</p>
+                                    </div>
+
+                                    <div class="col-span-9 border-t border-gray-400">
+                                        <p>@Model.FrameworkModel.Nodes[i].ChildNodes[j].Name</p>
+                                    </div>
+
+
+
+                                }
+
+
+                            </div>
+                             
+                            <br>
+                        }
+                        <a href="Competencies?LevelCategoryJson=@Model.LevelCategoryJson&programId=@Model.programId">Add competency </a>
+                        <br>
+            </div>
+        </div>
+        <br>
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+                <h2 class="justify-start col-span-6"> Levels in this framework. </h2>
+            </div>
+            <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+                        @for(int i = 0; i < @Model.LevelCategoryModels.Count; i++)
+                        {
+                            <div class="grid grid-cols-10 border border-gray-400">
+                                <h3 class="col-span-10">@Model.LevelCategoryModels[i].Name</h3>
+
+                                <h4 class="col-span-1 border-r border-t border-gray-400">Position</h4>
+                                <h4 class="col-span-9 border-t border-gray-400">Description</h4>                
+                            
+                            @for(int j = 0; j < @Model.LevelCategoryModels[i].Levels.Count; j++)
+                            {
+
+                                    <div class="col-span-1 border-t border-r border-gray-400">
+                                        <p> @Model.LevelCategoryModels[i].Levels[j].Position</p>
+                                    </div>
+
+                                    <div class="col-span-9 border-t border-gray-400">
+                                        <p> @Model.LevelCategoryModels[i].Levels[j].Name</p>
+                                    </div>
+                            
+                            }
+
+                            </div>
+
+                            <br>
+                        }
+
+                        <a href="NewLevelCategories?LevelCategoryJson=@Model.LevelCategoryJson&programId=@Model.programId">Add Level</a>
+
+                    
+                    </table>
+
+                
+
+                <p class="hidden" id="formError">Please fill in the required fields</p>
+
+            </div>
+        </div>
+        <br>
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+
+
+                <button type="submit" value="Submit" onclick="formValidation()">Submit</button>
+
+
+            </div>
+        </div>      
+    </form>
+</section>

@@ -4,6 +4,9 @@ namespace UoN.AccrediTool.Core.Models
 {
     public static class UoCoreModels
     {
+
+        private const int StartingYear = 1960;
+
         private static readonly IDictionary<int, string> _TermDict = new Dictionary<int, string>()
         {
             [0] = "Summer 1",
@@ -26,7 +29,7 @@ namespace UoN.AccrediTool.Core.Models
             [75] = "Trimester 3 (Singapore)",
             [80] = "Semester 2",
             [85] = "Trimester 3",
-            [91] = "Quarter 1",
+            [91] = "Quarter 1", 
             [92] = "Quarter 2",
             [93] = "Quarter 3",
             [94] = "Quarter 4"
@@ -42,6 +45,18 @@ namespace UoN.AccrediTool.Core.Models
                 }
             }
             return "Unknown";
+        }
+
+        public static int GetYearCode(int year)
+        {
+            if(year > StartingYear)
+            {
+                return year - StartingYear;
+            }
+            else
+            {
+                return 0;
+            }
         }
     }
 }

@@ -26,6 +26,7 @@ namespace UoN.AccrediTool.Core.Data
         public DbSet<UoProjectModel> Project { get; set; }
         public DbSet<UoUserGroupModel> UserGroup { get; set; }
         public DbSet<UoUserModel> User { get; set; }
+        public DbSet<UoLevelCategoryNodesJoin> LevelCategoryNodes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

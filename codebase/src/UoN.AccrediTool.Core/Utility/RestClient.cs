@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -64,6 +65,28 @@ namespace UoN.AccrediTool.Core.Utility
                 }
             }
         } 
+
+        public string Post(Uri path, HttpContent content)
+        {
+            if(!string.IsNullOrEmpty(_token))
+            {
+                _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_tokenType, _token);
+            }
+
+            var response = _client.PostAsync(path, content).Result;
+
+            
+            if (response.IsSuccessStatusCode)
+            {
+                return (response.Content.ReadAsStringAsync().Result);
+            }
+            else
+            {
+                return response.StatusCode.ToString();
+            }
+        }
+
+
         public T Get<T>(Uri path)
         {
             T t = default(T);
@@ -76,6 +99,106 @@ namespace UoN.AccrediTool.Core.Utility
                 t = JsonSerializer.Deserialize<T>(response.Content.ReadAsStringAsync().Result);
             }
             return t;
+        }
+
+        public string Get(Uri path)
+        {
+
+
+            if(!string.IsNullOrEmpty(_token))
+            {
+                _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_tokenType, _token);
+            }
+
+
+            var response = _client.GetAsync(path).Result;
+
+            
+
+            if (response.IsSuccessStatusCode)
+            {
+                return (response.Content.ReadAsStringAsync().Result);
+            }
+            else
+            {
+                return null;
+            }
+
+        }
+
+        public async void GetFile(Uri path, int projectId)
+        {
+
+            if(!System.IO.Directory.Exists("projects"))
+            {
+                System.IO.Directory.CreateDirectory("projects");
+            }
+
+
+            if(!string.IsNullOrEmpty(_token))
+            {
+                _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_tokenType, _token);
+            }
+
+
+            
+
+            var response = _client.GetAsync(path).Result;
+
+
+            
+
+            if (response.IsSuccessStatusCode)
+            {
+
+
+
+                var ms = await response.Content.ReadAsStreamAsync();
+
+                ms.Seek(0, SeekOrigin.Begin); // reset stream
+
+                var file = File.Create("projects/" + projectId + ".zip");
+
+                //save file
+                ms.CopyTo(file);
+
+                ms.Close();
+
+                file.Close();
+
+                
+
+               // return response;
+            }
+            // else
+            // {
+            //     return null;
+            // }
+
+        }
+
+
+
+        public string Delete(Uri path)
+        {
+            if(!string.IsNullOrEmpty(_token))
+            {
+                _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_tokenType, _token);
+            }
+
+            var response = _client.DeleteAsync(path).Result;
+
+            
+
+            if (response.IsSuccessStatusCode)
+            {
+                return (response.Content.ReadAsStringAsync().Result);
+            }
+            else
+            {
+                return null;
+            }
+
         }
 
         public void Dispose()

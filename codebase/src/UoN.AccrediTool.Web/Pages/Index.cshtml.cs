@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -9,9 +10,12 @@ using Microsoft.Extensions.Logging;
 using UoN.AccrediTool.Core.Models;
 using UoN.AccrediTool.Core.Utility;
 
+
+
 namespace UoN.AccrediTool.Web.Pages
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "<Pending>")]
+    [Authorize]
     public class IndexModel : PageModel, IDisposable
     {
         private readonly ILogger<IndexModel> _logger;
@@ -39,7 +43,7 @@ namespace UoN.AccrediTool.Web.Pages
         // public string StaticPath { get; set; }
         public UoProgramModel Program { get; set; }
 
-        // [Authorize(Roles = "Restricted-Access")]
+
         public void OnGet()
         {
             // StaticPath = _Configuration["Services:UoN.AccrediTool.Service:StaticPath"];

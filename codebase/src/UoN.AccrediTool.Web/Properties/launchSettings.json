@@ -7,7 +7,7 @@
       "sslPort": 44392
     }
   },
-  "profiles": {    
+  "profiles": {
     "TestMvcOkta.Web": {
       "commandName": "Project",
       "launchBrowser": true,

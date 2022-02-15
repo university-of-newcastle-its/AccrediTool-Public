@@ -1,0 +1,71 @@
+@page 
+@model NewNodeModel
+<script>
+
+    function formValidation()
+    {
+        let form = document.CompetenciesForm;
+
+        let isValid = true;
+
+
+        if(isValid)
+        {
+            form.submit()
+        }
+    
+    }
+
+    function addChildNode()
+    {
+        let HTML = ""
+    
+    }
+
+
+</script>
+
+<section class="py-4">
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+                <h1>Create new project. Add a new competencies</h1>
+                <hr>
+                <form method="POST" enctype="multipart/form-data" asp-page-handler="ChildNodes">
+                         <p>Number of child nodes: <input type="text" asp-for="NumOfChildNodes" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300"></p>   
+                          <button type="submit" value="Submit" >update</button>
+                          <input type="hidden" asp-for="LevelCategoryJson" value="@Model.LevelCategoryJson">
+                          <input type="hidden" asp-for="programId" value="@Model.programId">
+                </form>
+
+                <form method="POST" enctype="multipart/form-data" asp-page-handler="Submit" name="CompetenciesForm">
+
+                    <div class="grid grid-cols-1 gap-x-6 gap-y-3">
+                        <label> Node Name: </label>
+                        <input type="text" asp-for="Node.Name" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300">
+
+                        <input type="hidden" value="@Model.NodeModels">
+                    
+
+
+                        
+                        @for(int i = 0; i < @Model.NumOfChildNodes; i++)
+                        {
+                            <label>Node code:  @(Model.NodeModels.Count+1).@(i+1)</label>
+                            <label>Name: </label>
+                             <input type="text" asp-for="Node.ChildNodes[i].Name" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300">
+                             <input type="hidden" asp-for="Node.ChildNodes[i].NodeCode" value="@(Model.NodeModels.Count+1).@(i+1)">
+                            
+                        }
+
+                        </div>
+
+                        <input type="hidden" asp-for="LevelCategoryJson" value="@Model.LevelCategoryJson">
+                        <input type="hidden" asp-for="programId" value="@Model.programId">
+                </form>
+
+                <button type="submit" value="Submit" onclick="formValidation()">submit</button>   
+                    
+
+            </div>
+        </div>
+</section>

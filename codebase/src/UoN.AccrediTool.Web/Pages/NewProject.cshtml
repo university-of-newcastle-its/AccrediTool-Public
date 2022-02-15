@@ -1,0 +1,293 @@
+@page
+@model NewProjectModel
+@{
+
+}
+<script>
+    function formValidation() {
+        let form = document.NewProjectForm;
+        
+        let isValid = true;
+
+        const numbersOnly =  /^[0-9]*$/
+
+        if(form["ProjectModel.Name"].value == "")
+        {
+            form["ProjectModel.Name"].className = "rounded-lg border-solid border-2 border-red-600 focus:border-red-300"
+            isValid = false;
+        }
+        else
+        {
+             form["ProjectModel.Name"].className = "rounded-lg border-solid border-2 border-black-500 focus:border-blue-300"
+        }
+
+
+
+        if(form["ProjectModel.Description"].value == "")
+        {
+            form["ProjectModel.Description"].className = "rounded-lg border-solid border-2 border-red-600 focus:border-red-300 col-span-full h-56"
+             isValid = false;
+        }
+        else
+        {
+            form["ProjectModel.Description"].className = "rounded-lg border-solid border-2 border-black-500 focus:border-blue-300 col-span-full h-56"
+        }
+
+        
+
+        if(form["ProgramModel[0].ProgramCode"].value == "")
+        {
+            form["ProgramModel[0].ProgramCode"].className = "rounded-lg border-solid border-2 border-red-600 focus:border-red-300"
+            isValid = false;
+        }        
+        else if (!numbersOnly.test(form["ProgramModel[0].ProgramCode"].value))
+        {
+            form["ProgramModel[0].ProgramCode"].className = "rounded-lg border-solid border-2 border-red-600 focus:border-red-300"
+            isValid = false;
+
+            document.getElementById("programCodeError").className = "text-red-600 col-span-2"
+        }
+        else
+        {
+
+             form["ProgramModel[0].ProgramCode"].className = "rounded-lg border-solid border-2 border-black-500 focus:border-blue-300"
+             document.getElementById("programCodeError").className = "hidden"
+        }
+
+
+        if(form["ProgramModel[0].Name"].value == "")
+        {
+            form["ProgramModel[0].Name"].className = "rounded-lg border-solid border-2 border-red-600 focus:border-red-300"
+            isValid = false;
+        }
+        else
+        {
+             form["ProgramModel[0].Name"].className = "rounded-lg border-solid border-2 border-black-500 focus:border-blue-300"
+        }
+
+
+        const yearPattern = /^\d{4}$/;
+
+        
+        if(form["Year"].value == "")
+        {
+            form["Year"].className = "rounded-lg border-solid border-2 border-red-600 focus:border-red-300"
+            isValid = false;
+        }
+        else if(!yearPattern.test(form["Year"].value))
+        {
+             form["Year"].className = "rounded-lg border-solid border-2 border-red-600 focus:border-red-300"
+             isValid = false;
+
+            document.getElementById("yearError").textContent = "Year must be in format YYYY"
+        }
+        else
+        {
+             form["Year"].className = "rounded-lg border-solid border-2 border-black-500 focus:border-blue-300"
+             document.getElementById("yearError").textContent = ""
+        }
+
+
+        if(form["ProgramModel[0].MinUnits"].value == "")
+        {
+            form["ProgramModel[0].MinUnits"].className = "rounded-lg border-solid border-2 border-red-600 focus:border-red-300"
+            isValid = false;
+        }
+        else if(!numbersOnly.test(form["ProgramModel[0].MinUnits"].value))
+        {
+             form["ProgramModel[0].MinUnits"].className = "rounded-lg border-solid border-2 border-red-600 focus:border-red-300"
+             isValid = false;
+        
+            document.getElementById("minUnitsError").textContent = "Minimum units must only contain digits"
+        }
+        else
+        {
+             form["ProgramModel[0].MinUnits"].className = "rounded-lg border-solid border-2 border-black-500 focus:border-blue-300" 
+             document.getElementById("minUnitsError").textContent = ""
+        }
+
+        if(form["ProgramModel[0].Duration"].value == "")
+        {
+            form["ProgramModel[0].Duration"].className = "rounded-lg border-solid border-2 border-red-600 focus:border-red-300"
+            isValid = false;
+        }
+        else if(!numbersOnly.test(form["ProgramModel[0].Duration"].value))
+        {
+            form["ProgramModel[0].Duration"].className = "rounded-lg border-solid border-2 border-red-600 focus:border-red-300"
+            isValid = false;
+
+            document.getElementById("durationError").textContent = "Duration must only contain digits"
+        }
+        else
+        {
+            form["ProgramModel[0].Duration"].className = "rounded-lg border-solid border-2 border-black-500 focus:border-blue-300"
+            document.getElementById("durationError").textContent = ""
+        }
+
+        if(form["ProgramModel[0].MaxYears"].value == "")
+        {
+            form["ProgramModel[0].MaxYears"].className = "rounded-lg border-solid border-2 border-red-600 focus:border-red-300"
+            isValid = false;
+        }
+        else if(!numbersOnly.test(form["ProgramModel[0].MaxYears"].value))
+        {
+            form["ProgramModel[0].MaxYears"].className = "rounded-lg border-solid border-2 border-red-600 focus:border-red-300"
+            isValid = false;
+
+             document.getElementById("maxYearsError").textContent = "Duration must only contain digits"
+        }
+        else
+        {
+            form["ProgramModel[0].MaxYears"].className = "rounded-lg border-solid border-2 border-black-500 focus:border-blue-300"
+
+            document.getElementById("maxYearsError").textContent = ""
+        }
+
+        if(isValid == true) {
+            form.submit();
+        }
+        else
+        {
+            document.getElementById("formError").className = "text-red-600"
+        }
+       
+        
+    
+    }
+
+</script>
+
+<section class="py-4 " >
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+                <h1>Create new project. Add project and Program Infomation</h1>
+                <hr>
+                <br>
+                @if(!Model.IsValid)
+                {  
+                    <h1 class="text-red-600 underline decoration-red-600">Invalid form submitted, please try again.</h1><br>
+                }
+
+
+                <form method="POST" enctype="multipart/form-data" asp-page-handler="submit" name="NewProjectForm">
+
+                    <div class="grid grid-cols-2 gap-x-6 gap-y-2 h-full">      
+                        <label for="project name">Project's' Name:</label>
+                        <label for="framework Id">Framework:</label>
+                        <input type="text" asp-for="ProjectModel.Name" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300" name="ProjectModel.Name">
+                        <select asp-for="ProjectModel.FrameworkId"  class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300" name="ProjectModel.FrameworkId"> 
+                            <option value="0">New Framework</option>
+                            @for(int i = 0; i < @Model.FrameworkModels.Count; i++)
+                            {
+                                <option value ="@Model.FrameworkModels[i].FrameworkId">@Model.FrameworkModels[i].Name</option>
+                            }
+                        </select>
+
+                        <label for="description">Descritpion: </label><br>
+                        <textarea type="text" asp-for="ProjectModel.Description" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300 col-span-full h-56" name="ProjectModel.Description"></textarea>
+
+                    </div>
+
+                    <br><br>
+                              
+                    <div class="p-5 bg-grey border-2 border-solid border-black-300">
+                        <div class="grid grid-cols-2 gap-x-6 gap-y-2">
+
+                                <label for="ProgramCode">Program code: </label>
+                                <label for="Name">Program name:  </label>
+                                <input type="text" asp-for="ProgramModel[0].ProgramCode" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300"  value="">
+                                <input type="text" asp-for="ProgramModel[0].Name" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300" >
+
+                                <p id="programCodeError" class="hidden">Program code must be only contain digits</p>
+
+                                <label for="FirstTerm">First Year Offered: </label>
+                                <label for="MinUnits">Minimum Units:  </label>
+                                <input type="text" asp-for="Year"  class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300" value="">
+                                <input type="text" asp-for="ProgramModel[0].MinUnits" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300" >
+
+                                <p id="yearError" class="text-red-600"></p>
+                                <p id="minUnitsError" class="text-red-600"></p>
+
+                                <label for="Duration">Duration: </label>
+                                <label for="MaxYears">Maximum Years:  </label>
+                                <input type="text" asp-for="ProgramModel[0].Duration" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300" >
+                                <input type="text" asp-for="ProgramModel[0].MaxYears" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300">
+
+                                <p id="durationError" class="text-red-600"></p>
+                                <p id="maxYearsError" class="text-red-600"></p>
+
+                                <label for="CampusId">Campus:  </label>
+                                <label for="ProgramCareerId">Program Career:  </label>
+
+                                <select asp-for="ProgramModel[0].CampusId"  class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300">
+
+                                    @for(int i = 0; i < @Model.CampusModels.Count; i++)
+                                    {
+                                        <option value ="@Model.CampusModels[0].CampusId">@Model.CampusModels[i].Name</option>
+                                    }
+
+                                </select>
+
+                                <select asp-for="ProgramModel[0].ProgramCareerId"  class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300">
+                                    @for(int i = 0; i < @Model.ProgramCareerModels.Count; i++)
+                                    {
+                                        <option value="@Model.ProgramCareerModels[i].ProgramCareerId">@Model.ProgramCareerModels[i].Name</option>
+                                    }
+
+                                </select>
+
+                                <label for="">Field of Education: </label>
+                                <label for="">Semester: </label>
+
+                                <select asp-for="ProgramModel[0].FieldOfEducationId"  class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300">
+                                    @for(int i = 0; i < @Model.FieldOfEducationModels.Count; i++)
+                                    {
+                                        <option value="@Model.FieldOfEducationModels[i].FieldOfEducationId">@Model.FieldOfEducationModels[i].Name</option>
+                                    }
+
+                                </select>
+
+                                <select asp-for="Semester"  class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300">
+                                    <option value="40">Semester 1</option>
+                                    <option value="80">Semester 2</option>
+                                    <option value="25">Trimester 1</option>
+                                    <option value="55">Trimester 2</option>
+                                    <option value="85">Trimester 3</option>
+                                    <option value="00">Summer 1</option>
+                                    <option value="11">Summer 2</option>
+                                    <option value="60">Winter</option>
+                                    <option value="91">Quarter 1</option>
+                                    <option value="92">Quarter 2</option>
+                                    <option value="93">Quarter 3</option>
+                                    <option value="94">Quarter 4</option>
+                                    <option value="01">ELICOS Session 1</option>
+                                    <option value="02">ELICOS Session 2</option>
+                                    <option value="03">ELICOS Session 3</option>
+                                    <option value="04">ELICOS Session 4</option>
+                                    <option value="05">ELICOS Session 5</option>
+                                    <option value="06">ELICOS Session 6</option>
+                                    <option value="07">ELICOS Session 7</option>
+                                    <option value="08">ELICOS Session 8</option>
+                                    <option value="09">ELICOS Session 9</option>
+                                    <option value="15">Trimester 1 (Singapore)</option>
+                                    <option value="45">Trimester 2 (Singapore)</option>
+                                    <option value="75">Trimester 3 (Singapore)</option>
+                              </select>
+                            
+
+
+                        </div>
+
+                    </div>
+
+                
+                 
+             </form>
+
+                <p class="hidden" id="formError">Please fill in the required fields</p>
+
+                <button type="submit" value="Submit" onclick="formValidation()">submit</button>
+
+            </div>
+        </div>
+</section>

@@ -1,0 +1,44 @@
+﻿@page
+@model UoN.AccrediTool.Web.Pages.NewProject.NewLevelCategoriesModel
+@{
+}
+
+<section class="py-4">
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+            <h1>Create new project. Add a level category</h1>
+            <hr>
+                
+            <form method="POST" enctype="multipart/form-data" asp-page-handler="levels">
+                <p>Number of levels: <input type="text" asp-for="NumOfLevel" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300"></p>   
+                <button type="submit" value="Submit" >Update</button>
+                <input type="hidden" asp-for="LevelCategoryJson" value="@Model.LevelCategoryJson">
+                <input type="hidden" asp-for="programId" value="@Model.programId">
+            </form>
+
+            <form method="POST" enctype="multipart/form-data" asp-page-handler="submit">
+                <p>Level category name: <input type="text" asp-for="LevelCategoryModel.Name" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300"></p>   
+
+                <table>
+                    @for(int i = 0; i < @Model.LevelModels.Count; i++)
+                    {
+                        <tr>
+                            <td>Position: @(i+1) <input type="hidden" asp-for="LevelModels[i].Position" value="@(i+1)"> </td>
+                            <td>Name: <input type="text" asp-for="LevelModels[i].Name" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300"></td>
+                        </tr>
+                    }
+
+                </table>
+
+                <input type="hidden" asp-for="LevelCategoryJson" value="@Model.LevelCategoryJson">
+                <input type="hidden" asp-for="programId" value="@Model.programId">
+
+                <button type="submit" value="Submit" >Add</button>
+            </form>
+
+
+
+
+            </div>
+        </div>
+</section>

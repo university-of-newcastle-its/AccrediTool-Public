@@ -1,0 +1,40 @@
+﻿@page
+@model UoN.AccrediTool.Web.Pages.View.CompetenciesModel
+@{
+}
+
+<section class="py-4">
+    <div class="bg-white h-auto shadow sm:rounded-lg">
+        <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
+            <h2 class="text-lg font-semibold text-gray-900">Competencies</h2>
+        
+
+            
+                    <h2 class="px-6 py-3 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider bg-gray-50 align-middle">Element of Competency</h2>
+
+                @for(int i = 0; i < Model.NodeModels.Count; i++)
+                {
+                    @for(int j = 0; j < Model.NodeModels[i].ChildNodes.Count; j++)
+                    {
+                        <div class="py-3 px-6 border-b border-l border-r border-gray-200 ">
+                            <div class="inline-flex items-center px-2.5 py-0.5 mr-2 rounded-md font-medium leading-5 tracking-wider bg-gray-100 text-gray-900">
+                                @Model.NodeModels[i].ChildNodes[j].NodeCode
+                            </div>
+
+                            <div class="text-s text-gray-500">
+                                @Model.NodeModels[i].ChildNodes[j].Name
+
+                            </div>
+                        </div>
+                    }
+                }
+
+
+
+
+
+            
+        </div>
+        
+    </div>
+</section>

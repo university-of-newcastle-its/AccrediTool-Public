@@ -1,0 +1,24 @@
+﻿@page
+@model UoN.AccrediTool.Web.Pages.NewProject.SubmitProjectModel
+@{
+}
+
+<section class="py-4">
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+
+            @if(!Model.displayDownload)
+            {
+                <a href="SubmitProject?handler=API&programId=@Model.programId&projectId=@Model.projectId&CourseListJson=@Model.CourseListJson">submit </a>
+            }
+            else
+            {
+                <a href="SubmitProject?handler=Download&programId=@Model.programId&projectId=@Model.projectId&CourseListJson=@Model.CourseListJson">Download</a>
+            }
+
+            
+
+        
+        </div>
+    </div>
+</section>

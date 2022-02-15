@@ -32,6 +32,9 @@ namespace UoN.AccrediTool.Service
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            
+
+
             services.AddDbContext<DataContext>(builder => builder.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
             //Add following line to allow cross domain service sharing
@@ -80,6 +83,13 @@ namespace UoN.AccrediTool.Service
                 app.UseDeveloperExceptionPage();
             }
             */
+
+            
+
+            if(env.IsProduction())
+            {
+                Console.WriteLine("Production");
+            }
 
             app.UseStaticFiles(new StaticFileOptions
             {

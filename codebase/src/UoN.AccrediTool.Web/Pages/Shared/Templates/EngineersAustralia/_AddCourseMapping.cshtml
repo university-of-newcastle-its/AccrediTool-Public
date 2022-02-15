@@ -1,0 +1,52 @@
+﻿@model UoN.AccrediTool.Web.Pages.NewProject.Course.AddCourseModel
+
+
+
+
+<div class="grid grid-cols-10" id="CourseMapping_Num_@Model.NumOfComp">
+	<div class="col-span-6 border-b border-l grid grid-cols-10">
+
+		<div class="col-span-1 p-2 border-r">
+			 <input type="checkbox" id="Mapping_Selected_@Model.NumOfComp">
+		</div>
+		
+		<div class="col-span-8  p-2">
+
+			<select class="w-12 float-left mr-3"  name="courseMappings[@Model.NumOfComp].NodeId" id="courseMappings[@Model.NumOfComp].NodeId"> 
+				<option value="-1"></option> 
+				@for(int j = 0; j < Model.NodeModels.Count; j++)
+				{
+					<optgroup label="@Model.NodeModels[j].Name">
+						@for(int k = 0; k < Model.NodeModels[j].ChildNodes.Count; k++)
+						{
+							<option value="@Model.NodeModels[j].ChildNodes[k].NodeId" onclick="updateDescription(@Model.NumOfComp)">@Model.NodeModels[j].ChildNodes[k].NodeCode</option>
+						}
+					</optgroup>
+
+				}
+			</select>
+
+			<p id="Node_Description_@Model.NumOfComp" class="text-m text-gray-500"> Please select a Competency from the dropdown menu. For a more detailed descriptions of all the competencies <b class="cursor-pointer" onclick="openCompList()"> Click Here</b>. </p> 
+		</div>
+	</div>
+	<div class=" border-l border-b text-gray-200 p-5 align-middle cursor-pointer"   onclick="toggleTaught(@Model.NumOfComp)">
+		<input type="hidden" name="courseMappings[@Model.NumOfComp].Taught" id="courseMappings[@Model.NumOfComp].Taught" value="false">
+		<div id="Taught_CircleCross_@Model.NumOfComp"><partial name="SVG/CircleCross" /></div>
+		<div class="hidden" id="Taught_Checkmark_@Model.NumOfComp"><partial name="SVG/CircleCheckmark" /></div>
+
+
+	</div>
+	<div class="border-l text-gray-200 border-b p-5 align-middle cursor-pointer"  onclick="togglePracticed(@Model.NumOfComp)">
+		<input type="hidden" name="courseMappings[@Model.NumOfComp].Practiced" id="courseMappings[@Model.NumOfComp].Practiced" value="false">
+		<div id="Practiced_CircleCross_@Model.NumOfComp"><partial name="SVG/CircleCross" /></div>
+		<div class="hidden" id="Practiced_Checkmark_@Model.NumOfComp"><partial name="SVG/CircleCheckmark" /></div>
+	</div>
+	<div class="border-l text-gray-200 border-b p-5 align-middle cursor-pointer" onclick="toggleAssessed(@Model.NumOfComp)">
+		<input type="hidden" name="courseMappings[@Model.NumOfComp].Assessed" id="courseMappings[@Model.NumOfComp].Assessed" value="false">
+		<div id="Assessed_CircleCross_@Model.NumOfComp"><partial name="SVG/CircleCross" /></div>
+		<div class="hidden" id="Assessed_Checkmark_@Model.NumOfComp"><partial name="SVG/CircleCheckmark" /></div>
+	</div>
+	<div class="border-b border-l border-r align-middle p-5">
+		<input type="text" name="courseMappings[@Model.NumOfComp].Level" id="courseMappings[@Model.NumOfComp].Level" class="w-full h-full text-4xl text-center" value="0">
+	</div>
+<div>

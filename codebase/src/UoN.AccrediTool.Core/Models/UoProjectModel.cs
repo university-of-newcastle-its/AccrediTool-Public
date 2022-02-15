@@ -11,6 +11,8 @@ namespace UoN.AccrediTool.Core.Models
     [Table("project")]
     public class UoProjectModel
     {
+
+
         #region Entity properties
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -30,7 +32,9 @@ namespace UoN.AccrediTool.Core.Models
         #region Navigation properties
         [Column("framework")]
         public int? FrameworkId { get; set; }
-        public static bool ShouldSerializeFrameworkId() { return false; }
+
+        public static bool ShouldSerializeFrameworkIdBool {get; set;} = false;
+        public static bool ShouldSerializeFrameworkId() { return ShouldSerializeFrameworkIdBool; }
         public UoFrameworkModel Framework { get; set; }
         #endregion
 

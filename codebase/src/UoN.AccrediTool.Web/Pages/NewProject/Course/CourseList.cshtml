@@ -1,0 +1,107 @@
+﻿@page
+@model UoN.AccrediTool.Web.Pages.NewProject.Course.CourseListModel
+@{
+}
+
+<script>
+
+    function AddCourse(Pos, Year, Sem)
+    {
+
+        window.location.href = "AddCourse?handler=Position&Pos=" + Pos + "&Year="+ Year + "&Semester=" + Sem + "&programId=" + @Model.programId + "&projectId=" + @Model.projectId + "&CourseListJson=[" + @Model.CourseListJson + "]&LevelCategoryJson=[" + @Model.LevelCategoryJson + "]" ;
+    
+    
+    }
+
+    function OpenCourse(courseId)
+    {
+         window.open("/View/Course?courseId=" + courseId).focus();
+    }
+
+
+</script>
+
+<section class="py-4">
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+            <h2>Course List</h2>
+
+        </div>
+
+        <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+
+            @for(int i = 0; i < Model.ProgramModel.Duration; i++)
+            {
+                <div class="grid grid-cols-10 border-r border-t border-gray-300">
+                    <div class="bg-gray-100 border-l border-gray-300 align-middle text-center pt-44">
+                        <h3>Year @(i+1)</h3>
+                    </div>
+
+                    <div class="col-span-9 grid grid-cols-9 gap-x-6 border-l border-gray-300 pr-16">
+                        <div class="bg-gray-100 border-r border-gray-300 text-center pt-20">
+                            <h4> Semester 1</h4>
+                        </div>                 
+                        
+                        @for(int j = 0; j < 4; j++)
+                        {
+                            if (Model.CourseModels[((i) * 8) + j] == null)
+                            {
+                                 <div class="col-span-2 border border-gray-300 align-middle text-center m-12 h-24 w-36 pt-8 cursor-pointer hover:border-blue-500" onclick="AddCourse(@j, @(i+1), 1)">
+                                        Add Course                                                     
+                                </div>     
+                            }
+                            else
+                            {
+                                <div class="col-span-2 border border-gray-300 align-middle text-center m-12 h-24 w-36 cursor-pointer hover:border-blue-500" onclick="OpenCourse(@Model.CourseModels[((i) * 8) + j].CourseId)">
+                                        <p class="text-blue-700"> @Model.CourseModels[((i) * 8) + j].GetCourseCode() </p>
+                                        <p class="text-xs text-gray-500"> @Model.CourseModels[((i) * 8) + j].Name </p>                                               
+                                </div>  
+                            }
+                            
+
+
+                        }
+                    
+              
+                                       
+
+                        <div class="bg-gray-100 border-r border-t border-gray-300 text-center pt-20">
+                            <h4> Semester 2</h4>
+                        </div>                    
+                        
+                        
+                        @for(int j = 0; j < 4; j++)
+                        {
+                             if (Model.CourseModels[((i) * 8) + 4 + j] == null)
+                            {
+                                 <div class="col-span-2 border border-gray-300 align-middle text-center m-12 h-24 w-36 pt-8 cursor-pointer hover:border-blue-500" onclick="AddCourse(@j, @(i+1), 2)">
+                                        Add Course                                                     
+                                </div>     
+                            }
+                            else
+                            {
+                                <div class="col-span-2 border border-gray-300 align-middle text-center m-12 h-24 w-36 cursor-pointer hover:border-blue-500" onclick="OpenCourse(@Model.CourseModels[((i) * 8) + 4 + j].CourseId)">
+                                        <p class="text-blue-700"> @Model.CourseModels[((i) * 8) + 4 + j].GetCourseCode() </p>
+                                        <p class="text-xs text-gray-500"> @Model.CourseModels[((i) * 8) + 4 + j].Name </p>                                               
+                                </div> 
+                            }  
+                        } 
+
+                    </div>
+
+
+                </div>
+            }
+            <hr>
+            <div class="grid grid-cols-10">
+                <div class="col-span-9">
+                   
+                </div>
+
+                <a href="../SubmitProject?programId=@Model.programId&projectId=@Model.projectId&CourseListJson=@Model.CourseListJson&LevelCategoryJson=@Model.LevelCategoryJson" class="translate-x-full m-3 border border-gray-400 hover:border-sky-700 uppercase rounded-lg px-3 bg-gray-200 align-middle text-center col-span-1">Submit</a>
+            </div>
+            
+       </div> 
+    </div>
+
+</section>
