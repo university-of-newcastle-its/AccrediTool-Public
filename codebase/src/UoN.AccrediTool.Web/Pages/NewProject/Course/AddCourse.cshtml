@@ -8,6 +8,8 @@
 <script>
 
     let numOfCourseMappings = 0;
+    let assesmentCount = 0;
+    let learningOutcomeCount = 0;
 
     function formValidation()
     {
@@ -15,11 +17,114 @@
 
         let isValid = true;
 
+        let textInvalidClass = "rounded-lg border-solid border-2 border-red-500 focus:border-red-500";
+        let textValidClass= "rounded-lg border-solid border-2 border-black-500 focus:border-blue-300";
+
+        isValid = validateText("CourseModel_Name", isValid, textValidClass, textInvalidClass);
+        isValid = validateText("CourseCode", isValid, textValidClass, textInvalidClass);
+        isValid = validateText("CourseModel_Description", isValid, "rounded-lg border-solid border-2 border-black-500 focus:border-blue-300 col-span-full h-56", "rounded-lg border-solid border-2 border-red-500 focus:border-red-500 col-span-full h-56");
+
+        isValid = validateInteger("CourseModel_Units", isValid, textValidClass, textInvalidClass);
+
+        isValid = validateText("CourseModel_AcademicOrgId", isValid, "", "border border-red-500");
+        isValid = validateText("CourseModel_FieldOfEducationId", isValid, "", "border border-red-500");
+
+        if(numOfCourseMappings == 0)
+        {
+            document.getElementById("Mapping_Header").className = "justify-start col-span-1";
+
+            document.getElementById("OneMappingRequried").className = "text-red-500 justify-start col-span-5";
+
+            isValid = false;
+        }   
+        else
+        {
+            document.getElementById("Mapping_Header").className = "justify-start col-span-6";
+
+            document.getElementById("OneMappingRequried").className = "hidden";
+
+            for(let i = 0; i < numOfCourseMappings; i++)
+            {
+                if(document.getElementById("courseMappings[" + i + "].NodeId").value != -2)
+                {
+                    if(document.getElementById("courseMappings[" + i + "].NodeId").value == -1)
+                    {
+                        isValid = false;
+                        document.getElementById("courseMappings[" + i + "].NodeId").className = "w-12 float-left mr-3 border border-red-500";
+                    }
+                    else
+                    {
+                        document.getElementById("courseMappings[" + i + "].NodeId").className = "w-12 float-left mr-3";
+                    }
+
+                    if(document.getElementById("courseMappings[" + i + "].Level").value > 4 || document.getElementById("courseMappings[" + i + "].Level").value < 1)
+                    {
+                        isValid = false;
+                        document.getElementById("courseMappings[" + i + "].Level").className = "w-full h-full text-4xl text-center border border-red-500";
+                    }
+                    else
+                    {
+                        document.getElementById("courseMappings[" + i + "].Level").className = "w-full h-full text-4xl text-center";
+                    }
+
+
+                    if(document.getElementById("courseMappings[" + i + "].Taught").value == "true" || document.getElementById("courseMappings[" + i + "].Practiced").value == "true" || document.getElementById("courseMappings[" + i + "].Assessed").value == "true")
+                    {
+                        document.getElementById("InvalidMapping").className = "hidden";
+                    }
+                    else
+                    {
+                        isValid = false;
+                        document.getElementById("Mapping_Header").className = "justify-start col-span-1";
+                        document.getElementById("InvalidMapping").className = "text-red-500 justify-start col-span-5";
+                    }
+
+                    }
+
+     
+            }
+
+
+        }
 
         if(isValid)
         {
             form.submit()
         }
+    }
+
+    function validateInteger(id, isValid, validClass, invalidClass)
+    {
+        const numbersOnly =  /^[0-9]*$/;
+
+        isValid = validateText(id, isValid, validClass, invalidClass);
+
+        if(!numbersOnly.test(document.getElementById(id).value))
+        {
+            isValid = false;
+
+            document.getElementById(id).className = invalidClass
+        }
+
+
+        return isValid;
+
+    }
+
+    function validateText(id, isValid, validClass, invalidClass)
+    {
+        if(document.getElementById(id).value == "")
+        {
+            isValid = false;
+
+            document.getElementById(id).className = invalidClass
+        }
+        else
+        {
+            document.getElementById(id).className = validClass
+        }
+
+        return isValid;
     }
 
     function IncrementCourseMappings()
@@ -32,9 +137,9 @@
          return window.location.href
     }
 
-    function insertResponse(response)
+    function insertResponse(response, id)
     {
-        document.getElementById("Mapping").insertAdjacentHTML("beforeend", response);
+        document.getElementById(id).insertAdjacentHTML("beforeend", response);
     }
 
     function toggleTaught(index)
@@ -162,13 +267,44 @@
             {
                 if(document.getElementById("Mapping_Selected_" + i).checked)
                 {
-                     document.getElementById("CourseMapping_Num_" + i).innerHTML = "<input type=\"hidden\" name=\"courseMappings[" + i + "].NodeId\" id=\"courseMappings[" + i + "].NodeId\" value=\"-1\">";
+                     document.getElementById("CourseMapping_Num_" + i).innerHTML = "<input type=\"hidden\" name=\"courseMappings[" + i + "].NodeId\" id=\"courseMappings[" + i + "].NodeId\" value=\"-2\">";
                 }
     
             }
         }
     
     }
+
+    function removeSelectedAssessments()
+    {
+        for(let i = 0; i < assesmentCount; i++ )
+        {
+            if(document.getElementById("Assessment_Selected_" + i) !=null)
+            {
+                if(document.getElementById("Assessment_Selected_" + i).checked)
+                {
+                     document.getElementById("Assessment_Num_" + i).innerHTML = "<input type=\"hidden\" name=\"assessmentModels[" + i + "].Name\" id=\"assessmentModels[" + i + "].Name\" value=\"remove\">";
+                }
+    
+            }
+        }
+    }
+
+    function removeSelectedLearningOutcomes()
+    {
+        for(let i = 0; i < learningOutcomeCount; i++ )
+        {
+            if(document.getElementById("LearningOutcome_Selected_" + i) !=null)
+            {
+                if(document.getElementById("LearningOutcome_Selected_" + i).checked)
+                {
+                     document.getElementById("LearningOutcome_Num_" + i).innerHTML = "<input type=\"hidden\" name=\"learningOutcomeModels[" + i + "].Name\" id=\"learningOutcomeModels[" + i + "].Name\" value=\"remove\">";
+                }
+    
+            }
+        }
+    }
+
 
     function getFieldOfEdu()
     {
@@ -248,9 +384,52 @@
 
     }
 
+    function addAssessment()
+    {
+        $.ajax({
+            type: "POST",
+            url: "AddCourse?handler=AddAssessment",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("XSRF-TOKEN",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            data: JSON.stringify({
+                    num: assesmentCount
+                }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function(response){
+                    insertResponse(response, "Assessments");
+            }
+        });
+        
+        assesmentCount++;
+    }
 
-    $(document).ready(function(){
-        $("#CourseMapping").click(function(){
+    function addLearningOutcome()
+    {
+        $.ajax({
+            type: "POST",
+            url: "AddCourse?handler=AddLearningOutcome",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("XSRF-TOKEN",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            data: JSON.stringify({
+                    num: learningOutcomeCount
+                }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function(response){
+                    insertResponse(response, "LearningOutcomes");
+            }
+        });
+        
+        learningOutcomeCount++;
+    }
+
+    function addMapping()
+    {
             $.ajax({
                 type: "POST",
                 url: "AddCourse?handler=AddMapping",
@@ -265,16 +444,128 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "html",
                 success: function(response){
-                        insertResponse(response);
+                        insertResponse(response, "Mapping");
                 }
         });
         IncrementCourseMappings();
-      });
-    
+    }
 
-      
+    function getMapping()
+    {
+            $.ajax({
+                type: "POST",
+                url: "AddCourse?handler=LoadMapping",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("XSRF-TOKEN",
+                        $('input:hidden[name="__RequestVerificationToken"]').val());
+                },
+                data: JSON.stringify({
+                    loadCourse: "@Model.loadCourse",
+                    courseId: @Model.loadedCourseId
+                }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function(response){
+                        loadMapping(response);
+                }
+        });
+    }
+
+    function loadMapping(response)
+    {
+        
+        var nodeArr = []
+        for(let i = 0; i < response.length; i++)
+        {
+            var addNode = true;
+            for(let j = 0; j < nodeArr.length; j++)
+            {
+                if(nodeArr[j] == response[i].nodeId)
+                {
+                    addNode = false;
+                }
+            }
+
+            if (addNode)
+            {
+                nodeArr.push(response[i].nodeId)
+            }
+
+
+        }
+        
+        for(let i = 0; i < nodeArr.length; i++)
+        {
+            addMapping()            
+        }
+
+        setTimeout(function(){  fillMapping(response, nodeArr) }, 250) 
+    }
+
+    function fillMapping(response, nodeArr)
+    {
+        for(let i = 0; i < nodeArr.length; i++)
+        {
+            document.getElementById("node-"+ i + "-" + nodeArr[i]).selected = "true";
+
+        }
+
+        for(let i = 0; i < response.length; i++)
+        {
+            let index = 0
+            for(let j = 0; j < nodeArr.length; j ++)
+            {
+                if(nodeArr[j] == response[i].nodeId)
+                {
+                    index = j;
+                }
+            }
+
+
+            if(response[i].levelCatName == "Implied Pedagogy")
+            {
+
+                if(response[i].levelName == "Taught")
+                {
+                    toggleTaught(index)
+                }                
+                else if(response[i].levelName == "Practiced")
+                {
+                    togglePracticed(index)
+                }                
+                else if(response[i].levelName == "Assessed")
+                {
+                    toggleAssessed(index)
+                }
+            }
+            else if(response[i].levelCatName == "Level of Capability")
+            {
+                if(response[i].levelName == "Introduction to a topic at a University level")
+                {
+                    document.getElementById("courseMappings[" + index +"].Level").value = 1
+                }                
+                else if(response[i].levelName == "Progressive reinforcements of a topic at a University level")
+                {
+                    document.getElementById("courseMappings[" + index +"].Level").value = 2
+                }                
+                else if(response[i].levelName == "Progressive and advanced reinforcements of a topic at a University level")
+                {
+                    document.getElementById("courseMappings[" + index +"].Level").value = 3
+                }                
+                else if(response[i].levelName == "Reinforcement of skills commensurate with an Honours graduate and entry to professional practice")
+                {
+                    document.getElementById("courseMappings[" + index +"].Level").value = 4
+                }
+
+                
+            }
+        }
+    }
+
+    $(document).ready(function(){
+        getMapping()
+
     });
-
 
 </script>
 
@@ -288,6 +579,8 @@
 <input type="hidden" asp-for="projectId" value="@Model.projectId">
 <input type="hidden" asp-for="CourseListJson" value="@Model.CourseListJson">
 <input type="hidden" asp-for="LevelCategoryJson" value="@Model.LevelCategoryJson">
+<input type="hidden" asp-for="loadCourse" value="@Model.loadCourse">
+<input type="hidden" asp-for="loadedCourseId" value="@Model.loadedCourseId">
 
     <div class="bg-white overflow-hidden shadow rounded-lg">
         <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
@@ -303,7 +596,8 @@
                     <label>Course Code: </label>
                     
                     <input type="text" asp-for="CourseModel.Name" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300"> 
-                    <input type="text" asp-for="CourseCode" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300">  
+                    <input type="text" asp-for="CourseCode" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300"> 
+
             </div>
 
             <div class="grid grid-cols-1">
@@ -316,7 +610,15 @@
                 <label>Academic Org: </label>
                 <input type="text" asp-for="CourseModel.Units" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300">
                 <select asp-for="CourseModel.AcademicOrgId" class="" onclick="getAcademicOrg()">
-                    <option value="">Academic Org</option>
+                    @if(Model.loadCourse)
+                    {
+                        <option value="@Model.CourseModel.AcademicOrg.AcademicOrgId">@Model.CourseModel.AcademicOrg.Name</option>
+                    }
+                    else
+                    {
+                        <option value="">Academic Org</option>
+                    }
+                    
 
 
 
@@ -325,8 +627,14 @@
                 <label class="col-span-full">Field Of Education: </label>
                 @* <input type="text" asp-for="CourseModel.FieldOfEducation" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300"> *@
                 <select asp-for="CourseModel.FieldOfEducationId" class="" onclick="getFieldOfEdu()">
+                    @if(Model.loadCourse)
+                    {
+                        <option value="@Model.CourseModel.FieldOfEducation.FieldOfEducationId">@Model.CourseModel.FieldOfEducation.Name</option>
+                    }
+                    else
+                    {
                     <option value="">Field Of Education</option>
-
+                    }
 
                 </select>
             </div>
@@ -343,11 +651,13 @@
     <br>
     <div class="bg-white overflow-hidden shadow rounded-lg">
         <div class="border-b border-gray-200 px-4 py-5 sm:px-6 grid grid-cols-10 gap-x-24 gap-y-2">
-            <h2 class="justify-start col-span-6"> Mapping </h2>
+            <h2 class="justify-start col-span-6" id="Mapping_Header"> Mapping </h2>
+            <b class="hidden" id="OneMappingRequried">At least one course mapping is required</b>
+            <b class="hidden" id="InvalidMapping">Invalid Course Mapping: Courses must have Taught, Practiced or Assessed asgined to them.</b>
 
             <div class="col-span-4 grid grid-cols-10 gap-x-6">
                 
-                <h2 id="CourseMapping" class="justify-end cursor-pointer border border-gray-400 hover:border-sky-700 uppercase rounded-lg px-3 bg-gray-200 align-middle col-span-4 text-center">Add Mapping</h2>
+                <h2 id="CourseMapping" class="justify-end cursor-pointer border border-gray-400 hover:border-sky-700 uppercase rounded-lg px-3 bg-gray-200 align-middle col-span-4 text-center" onclick="addMapping()">Add Mapping</h2>
                 <h2 id="RemoveCourseMapping" class="cursor-pointer border border-gray-400 hover:border-sky-700 uppercase rounded-lg px-3 bg-gray-200 align-middle col-span-6 text-center" onclick="removeSelected()">Remove Selected Mapping</h2>
 
             </div>
@@ -366,8 +676,70 @@
     </div>
      <br>
     <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="border-b border-gray-200 px-4 py-3 sm:px-6">
+            <h2 class="justify-start"> Instance </h2>
+        </div>
+
+        <div class="border-b border-gray-200 px-4 py-3 sm:px-6">
+            
+
+
+            <div class="grid grid-cols-2">
+                <h3>Assessments</h3>
+                <div class="grid grid-cols-10 gap-x-4">
+                    <h3 class="justify-end cursor-pointer border border-gray-400 hover:border-sky-700 uppercase rounded-lg px-3 bg-gray-200 align-middle text-center col-span-4" onclick="addAssessment()">Add Assesment</h3>
+                    <h3 class="justify-end cursor-pointer border border-gray-400 hover:border-sky-700 uppercase rounded-lg px-3 bg-gray-200 align-middle text-center col-span-6" onclick="removeSelectedAssessments()">Remove Selected Assesments</h3>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="border-b border-gray-200 px-4 py-3 sm:px-6">
+
+            <div id="Assessments">
+                <div class="grid grid-cols-9 w-90 h-12 border-b border-gray-200 bg-gray-50">
+                    <h3 class="px-6 py-3 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider col-span-3 bg-gray-50 align-middle">Assessment Name</h3>
+                    <h3 class="px-6 py-3 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider col-span-3 bg-gray-50 align-middle">Weight</h3>
+                    <h3 class="px-6 py-3 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider col-span-3 bg-gray-50 align-middle">Assessment Type</h3>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="border-b border-gray-200 px-4 py-3 sm:px-6">
+            
+            <br>
+
+            <div class="grid grid-cols-3">
+                <h3>Learning Outcomes</h3>
+                <div class="grid grid-cols-10 gap-x-4 col-span-2">
+                    <h3 class="justify-end cursor-pointer border border-gray-400 hover:border-sky-700 uppercase rounded-lg px-3 bg-gray-200 align-middle text-center col-span-4" onclick="addLearningOutcome()">Add Learning Outcomes</h3>
+                    <h3 class="justify-end cursor-pointer border border-gray-400 hover:border-sky-700 uppercase rounded-lg px-3 bg-gray-200 align-middle text-center col-span-6" onclick="removeSelectedLearningOutcomes()">Remove Selected Learning Outcomes</h3>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="border-b border-gray-200 px-4 py-3 sm:px-6">
+
+            <div id="LearningOutcomes">
+                <div class="grid grid-cols-1 w-90 h-12 border-b border-gray-200 bg-gray-50">
+                    <h3 class="px-6 py-3 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider col-span-1 bg-gray-50 align-middle">Learning Outcomes</h3>
+                </div>
+
+            </div>
+
+
+
+        </div>
+
+    </div>
+    <br>
+
+    <div class="bg-white overflow-hidden shadow rounded-lg">
         <div class="border-b border-gray-200 px-4 py-3 sm:px-6 h-12 align-middle">
-             <button type="submit" value="Submit" class="float-right border border-gray-400 hover:border-sky-700 uppercase rounded-lg px-3 bg-gray-200 align-middle text-right" onlclick="formValidation" >Submit</button>
+             <a class="float-right border border-gray-400 hover:border-sky-700 uppercase rounded-lg px-3 bg-gray-200 align-middle text-right cursor-pointer" onclick="formValidation()" >Submit</a>
         </div>
      </div>
 

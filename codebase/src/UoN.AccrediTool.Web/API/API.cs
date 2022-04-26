@@ -32,6 +32,7 @@ namespace UoN.AccrediTool.Web.API
                 });
 
             return client;
+
         }
 
         public static string PostJSON(string json, string endpoint, IConfiguration configuration)
@@ -49,6 +50,16 @@ namespace UoN.AccrediTool.Web.API
             RestClient client = GetRestClient(configuration);
 
             return client?.Get(new Uri("api/" + endpoint, UriKind.Relative ));
+
+        }
+
+        public static string Update(string json, string endpoint, IConfiguration configuration)
+        {
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            RestClient client = GetRestClient(configuration);
+
+            return client?.Put(new Uri("api/" + endpoint, UriKind.Relative ), content);
 
         }
 
@@ -88,7 +99,7 @@ namespace UoN.AccrediTool.Web.API
 
     
 
-        public static bool Delete(string endpoint, int id, IConfiguration configuration)
+        public static bool Delete(string endpoint, IConfiguration configuration)
         {
             RestClient client = GetRestClient(configuration);
 

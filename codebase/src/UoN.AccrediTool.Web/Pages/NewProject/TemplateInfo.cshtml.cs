@@ -17,7 +17,7 @@ using UoN.AccrediTool.Core.Data;
 
 namespace UoN.AccrediTool.Web.Pages
 {
-    //[Authorize]
+   // [Authorize]
     public class TemplateInfoModel : PageModel
     {
 
@@ -68,11 +68,11 @@ namespace UoN.AccrediTool.Web.Pages
 
                     for (int j = 0; j < FrameworkModel.Nodes[i].ChildNodes.Count; j++) // remove childern
                     {
-                        API.API.Delete("nodes/", FrameworkModel.Nodes[i].ChildNodes[j].NodeId, _Configuration);
+                        API.API.Delete("nodes/" + FrameworkModel.Nodes[i].ChildNodes[j].NodeId, _Configuration);
                         FrameworkModel.Nodes[i].ChildNodes[j].NodeId = 0;
                     }
 
-                    API.API.Delete("nodes/", FrameworkModel.Nodes[i].NodeId, _Configuration); // remove parent
+                    API.API.Delete("nodes/" + FrameworkModel.Nodes[i].NodeId, _Configuration); // remove parent
                     FrameworkModel.Nodes[i].NodeId = 0;
                 }
 
@@ -89,6 +89,44 @@ namespace UoN.AccrediTool.Web.Pages
                 }
 
                 Response.Cookies.Append("nodeIdCookie", JsonConvert.SerializeObject(nodeIds, Formatting.None).ToString());
+
+                
+
+                if (LevelCategoryJson != null)
+                {
+                    List<int> LevelCatIds = JsonConvert.DeserializeObject<List<int>>(LevelCategoryJson);
+
+                    for (int i = 0; i < LevelCatIds.Count; i++)
+                    {
+                        LevelCategoryModels.Add(JsonConvert.DeserializeObject<UoLevelCategoryModel>(API.API.GetJSON("level-categories/" + LevelCatIds[i], _Configuration)));
+                    }
+
+                }
+
+
+                string json;
+
+                foreach (UoLevelCategoryModel categoryModel in LevelCategoryModels)
+                {
+                    foreach (UoNodeModel node in FrameworkModel.Nodes)
+                    {
+                        json = new JObject(new JProperty("levelCategoryId", categoryModel.LevelCategoryId),
+                                            new JProperty("nodeId", node.NodeId)).ToString();
+
+                        API.API.PostJSON(json, "level-category-nodes", _Configuration);
+
+                        foreach (UoNodeModel childNode in node.ChildNodes)
+                        {
+                            json = new JObject(new JProperty("levelCategoryId", categoryModel.LevelCategoryId),
+                                            new JProperty("nodeId", childNode.NodeId)).ToString();
+                
+                            API.API.PostJSON(json, "level-category-nodes", _Configuration);
+
+                            
+                        }
+                    }
+            }
+
 
             }
             else

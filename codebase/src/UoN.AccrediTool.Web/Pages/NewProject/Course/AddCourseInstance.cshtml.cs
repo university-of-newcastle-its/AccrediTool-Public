@@ -16,7 +16,7 @@ using UoN.AccrediTool.Core.Models;
 
 namespace UoN.AccrediTool.Web.Pages.NewProject.Course
 {
-    //[Authorize]
+   // [Authorize]
     public class AddCourseInstanceModel : PageModel
     {
 

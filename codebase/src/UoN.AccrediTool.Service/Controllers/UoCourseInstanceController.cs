@@ -188,5 +188,20 @@ namespace UoN.AccrediTool.Service.Controllers
             return NotFound();
         }
         #endregion
+
+        #region DELETE: api/course-instances/course/{id:int}
+        [HttpDelete("{id}")]
+        public Task<IActionResult> DeleteByCourseId(int id)
+        {
+            string method = "Delete";
+            string traceId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+            _logger.LogInformation("{0} - Web API - Controller: {1}, Method: {2}, Id: {3}, User: {4}", traceId, controllerName, method, id, User.Identity.Name);
+
+            Repository.DeleteCourseInstanceByCourseId(id);
+
+            return null;
+        }
+
+        #endregion
     }
 }

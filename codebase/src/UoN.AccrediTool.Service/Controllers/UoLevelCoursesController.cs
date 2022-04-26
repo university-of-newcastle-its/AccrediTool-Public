@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 
 using UoN.AccrediTool.Core.Data;
 using UoN.AccrediTool.Core.Repositories;
@@ -75,6 +76,25 @@ namespace UoN.AccrediTool.Service.Controllers
                     return NoContent();
                 }
                 return BadRequest();
+            }
+            return NotFound();
+        }
+        #endregion
+
+        
+        #region GET: api/level-courses/{id:int}
+        [HttpGet("{id}")]
+        [Produces(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult<List<UoLevelCoursesJoin>> Get(int id)
+        {
+            string method = "Get";
+            string traceId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+            _logger.LogInformation("{0} - Web API - Controller: {1}, Method: {2}, Id: {3}, User: {4}", traceId, controllerName, method, id, User.Identity.Name);
+            List<UoLevelCoursesJoin> levelCoursesJoins = Repository.GetLevelCoursesByCourseId(id);
+            if (levelCoursesJoins.Count > 0)
+            {
+                return levelCoursesJoins;
             }
             return NotFound();
         }

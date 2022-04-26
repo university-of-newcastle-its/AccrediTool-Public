@@ -19,7 +19,7 @@
 					<optgroup label="@Model.NodeModels[j].Name">
 						@for(int k = 0; k < Model.NodeModels[j].ChildNodes.Count; k++)
 						{
-							<option value="@Model.NodeModels[j].ChildNodes[k].NodeId" onclick="updateDescription(@Model.NumOfComp)">@Model.NodeModels[j].ChildNodes[k].NodeCode</option>
+							<option value="@Model.NodeModels[j].ChildNodes[k].NodeId" id="node-@Model.NumOfComp-@Model.NodeModels[j].ChildNodes[k].NodeId" onclick="updateDescription(@Model.NumOfComp)">@Model.NodeModels[j].ChildNodes[k].NodeCode</option>
 						}
 					</optgroup>
 
@@ -46,7 +46,7 @@
 		<div id="Assessed_CircleCross_@Model.NumOfComp"><partial name="SVG/CircleCross" /></div>
 		<div class="hidden" id="Assessed_Checkmark_@Model.NumOfComp"><partial name="SVG/CircleCheckmark" /></div>
 	</div>
-	<div class="border-b border-l border-r align-middle p-5">
+	<div class="border-b border-l border-r align-middle">
 		<input type="text" name="courseMappings[@Model.NumOfComp].Level" id="courseMappings[@Model.NumOfComp].Level" class="w-full h-full text-4xl text-center" value="0">
 	</div>
 <div>

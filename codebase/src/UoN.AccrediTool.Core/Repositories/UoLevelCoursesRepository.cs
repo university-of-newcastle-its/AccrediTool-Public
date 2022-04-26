@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 using UoN.AccrediTool.Core.Data;
@@ -12,6 +14,8 @@ namespace UoN.AccrediTool.Core.Repositories
         {
             _context = context;
         }
+
+
 
         public async Task<int?> AddLevelCourses(UoLevelCoursesJoin levelCourses)
         {
@@ -46,5 +50,17 @@ namespace UoN.AccrediTool.Core.Repositories
             }
             return null;
         }
+
+        public List<UoLevelCoursesJoin> GetLevelCoursesByCourseId(int id)
+        {
+            
+
+            List<UoLevelCoursesJoin> LevelCoursesJoins = _context.LevelCourseJoins
+                                .Where(LevelCourseJoins => LevelCourseJoins.CourseId == id).ToList();
+            
+            
+            return LevelCoursesJoins;
+        }
+
     }
 }

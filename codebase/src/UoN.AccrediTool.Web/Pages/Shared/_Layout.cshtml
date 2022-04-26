@@ -4,8 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - AccrediTool</title>
-    <link rel="stylesheet" href="http://localhost:53924/api/static/css/site.css" />
-    <link rel="stylesheet" href="http://localhost:53924/api/static/css/inter.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/inter.css" />
 </head>
 <body>
     <div x-data="{ sidebarOpen: false }"
@@ -81,7 +81,7 @@
                     </div>
                     <!-- Sidebar component for desktop -->
                     <nav class="mt-5 flex-1 px-2 bg-white">
-                        <a class="text-sm leading-5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 focus:bg-gray-100 group flex items-center px-2 py-2 font-medium rounded-md focus:outline-none transition ease-in-out duration-150" asp-page="Index">Home</a>
+                        <a class="text-sm leading-5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 focus:bg-gray-100 group flex items-center px-2 py-2 font-medium rounded-md focus:outline-none transition ease-in-out duration-150" href="/">Home</a>
                         <a class="text-sm leading-5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 focus:bg-gray-100 group flex items-center px-2 py-2 font-medium rounded-md focus:outline-none transition ease-in-out duration-150" href="/NewProject">New Project</a>
                         <a class="text-sm leading-5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 focus:bg-gray-100 group flex items-center px-2 py-2 font-medium rounded-md focus:outline-none transition ease-in-out duration-150" href="/DownloadProject">Download Project</a>
                         <!--
@@ -117,8 +117,8 @@
             </main>
         </div>
     </div>
-    <script type="module" src="http://localhost:53924/api/static/lib/alpine.js"></script>
-    <script nomodule src="http://localhost:53924/api/static/lib/alpine-ie11.js" defer></script>
+    <script type="module" src="~/lib/alpine.js"></script>
+    <script nomodule src="~/lib/alpine-ie11.js" defer></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)
 </body>

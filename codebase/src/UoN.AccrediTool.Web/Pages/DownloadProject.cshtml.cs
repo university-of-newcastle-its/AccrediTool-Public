@@ -21,7 +21,7 @@ using Newtonsoft.Json.Linq;
 
 namespace UoN.AccrediTool.Web.Pages
 {
-    //[Authorize]
+   // [Authorize]
     public class DownloadProjectModel : PageModel
     {
         [BindProperty]

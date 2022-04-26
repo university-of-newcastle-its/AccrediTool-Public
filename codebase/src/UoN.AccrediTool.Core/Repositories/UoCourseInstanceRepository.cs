@@ -159,5 +159,18 @@ namespace UoN.AccrediTool.Core.Repositories
             }
             return null;
         }
+
+        public async void DeleteCourseInstanceByCourseId(int id)
+        {
+            List<UoCourseInstanceModel> courseInstanceModels = _context.CourseInstance.Where(CourseInstance => CourseInstance.CourseId == id).ToList();
+
+            
+            foreach(UoCourseInstanceModel courseInstance in courseInstanceModels)
+            {
+                await DeleteCourseInstanceById(courseInstance.CourseInstanceId);
+            }
+
+    
+        }
     }
 }

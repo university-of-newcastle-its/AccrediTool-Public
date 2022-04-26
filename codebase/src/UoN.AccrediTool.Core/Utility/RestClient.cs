@@ -66,6 +66,25 @@ namespace UoN.AccrediTool.Core.Utility
             }
         } 
 
+        public string Put(Uri path, HttpContent content)
+        {
+            if(!string.IsNullOrEmpty(_token))
+            {
+                _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_tokenType, _token);
+            }
+            
+            var response = _client.PutAsync(path, content).Result;
+
+            if (response.IsSuccessStatusCode)
+            {
+                return (response.Content.ReadAsStringAsync().Result);
+            }
+            else
+            {
+                return response.StatusCode.ToString();
+            }
+
+        }
         public string Post(Uri path, HttpContent content)
         {
             if(!string.IsNullOrEmpty(_token))

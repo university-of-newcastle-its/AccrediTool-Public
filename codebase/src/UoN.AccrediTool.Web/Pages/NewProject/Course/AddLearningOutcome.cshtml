@@ -1,0 +1,13 @@
+@model UoN.AccrediTool.Web.Pages.NewProject.Course.AddCourseModel
+
+<div class="grid grid-cols-10" id="LearningOutcome_Num_@Model.NumOfLearningOutcome">
+        <div class="col-span-1 p-2 border-r border-l border-b grid grid-cols-2">
+            <input type="checkbox" id="LearningOutcome_Selected_@Model.NumOfLearningOutcome">
+        </div>
+
+        <div class="col-span-9 border-b border-r align-middle w-full h-full">
+            <input type="text" name="learningOutcomeModels[@Model.NumOfLearningOutcome].Name" id="learningOutcomeModels[@Model.NumOfLearningOutcome].Name" class="w-full h-full">
+        </div>
+
+    <input type="hidden" value="@(Model.NumOfLearningOutcome+1)" name="learningOutcomeModels[@Model.NumOfLearningOutcome].Position"  id="learningOutcomeModels[@Model.NumOfLearningOutcome].Position">
+</div>

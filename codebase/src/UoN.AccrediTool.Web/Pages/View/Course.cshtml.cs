@@ -8,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 
 //JSON.net
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 
 using UoN.AccrediTool.Core.Models;
 
@@ -16,7 +18,6 @@ namespace UoN.AccrediTool.Web.Pages.View
     public class CourseModel : PageModel
     {
 
-        public UoCourseModel courseModel { get; set; } = new();
 
         [BindProperty(SupportsGet = true)]
         public int courseId { get; set; }
@@ -29,10 +30,14 @@ namespace UoN.AccrediTool.Web.Pages.View
         }
 
 
-        public void OnGet()
+        public IActionResult OnGet()
         {
-            courseModel = JsonConvert.DeserializeObject<UoCourseModel>(API.API.GetJSON("courses/" + courseId, _Configuration));
+   
 
+            return Content(API.API.GetJSON("courses/" + courseId + "/view", _Configuration), "text/html");
         }
+
+
+
     }
 }

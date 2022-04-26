@@ -1,0 +1,30 @@
+@model UoN.AccrediTool.Web.Pages.NewProject.Course.AddCourseModel
+
+<div class="grid grid-cols-3" id="Assessment_Num_@Model.NumOfAssessments">
+    <div class="grid grid-cols-10" >
+            <div class="col-span-1 p-2 border-r border-l border-b">
+                <input type="checkbox" id="Assessment_Selected_@Model.NumOfAssessments">
+            </div>
+
+            <div class="col-span-9 border-b align-middle w-full h-full">
+                <input type="text" name="assessmentModels[@Model.NumOfAssessments].Name" id="assessmentModels[@Model.NumOfAssessments].Name" class="w-full h-full">
+            </div>
+        
+    </div >
+
+    <div class="border-l border-b align-middle ">
+        <input type="text" name="assessmentModels[@Model.NumOfAssessments].Weight" id="assessmentModels[@Model.NumOfAssessments].Weight" class="w-full h-full">
+    </div>
+
+    <div class="border-l border-b border-r align-middle">
+        <select name="assessmentModels[@Model.NumOfAssessments].AssessmentTypeId" id="assessmentModels[@Model.NumOfAssessments].AssessmentTypeId" class="w-full h-full"> 
+            @for(int i = 0; i < Model.AssessmentTypeModels.Count; i++)
+            {
+                <option value="@Model.AssessmentTypeModels[i].AssessmentTypeId">@Model.AssessmentTypeModels[i].Name</option>
+            }
+        </select>
+    </div>
+
+    <input type="hidden" value="@(Model.NumOfAssessments+1)" name="assessmentModels[@Model.NumOfAssessments].Position"  id="assessmentModels[@Model.NumOfAssessments].Position">
+</div>
+

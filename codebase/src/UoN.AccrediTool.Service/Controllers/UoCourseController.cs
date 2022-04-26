@@ -122,9 +122,12 @@ namespace UoN.AccrediTool.Service.Controllers
 
         #region PUT: api/courses/{id:int}
         [HttpPut("{id}")]
+        [Produces(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        
         public async Task<IActionResult> Put(int id, [FromBody] UoCourseModel course)
         {
             string method = "Put";
@@ -137,7 +140,13 @@ namespace UoN.AccrediTool.Service.Controllers
                 {
                     return NoContent();
                 }
-                return BadRequest();
+
+                if(course.CourseId != id)
+                {
+                 return BadRequest();
+                }
+                string uri = "http" + (HttpContext.Request.IsHttps ? "s" : "") + "://" + HttpContext.Request.Host.ToString() + "/api/courses/" + id.ToString(Thread.CurrentThread.CurrentCulture);
+                return Created(new System.Uri(uri), course);
             }
             return NotFound();
         }

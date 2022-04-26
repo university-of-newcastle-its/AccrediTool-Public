@@ -5,39 +5,29 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 
 using UoN.AccrediTool.Core.Models;
-using UoN.AccrediTool.Core.Utility;
 
+
+//JSON.net
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 
 namespace UoN.AccrediTool.Web.Pages
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "<Pending>")]
-    [Authorize]
-    public class IndexModel : PageModel, IDisposable
+   // [Authorize]
+    public class IndexModel : PageModel
     {
-        private readonly ILogger<IndexModel> _logger;
         private readonly IConfiguration _Configuration;
-        private RestClient _client;
-        private bool disposed = false;
 
-        public IndexModel(ILogger<IndexModel> logger, IConfiguration configuration)
+
+
+
+        public IndexModel(IConfiguration configuration)
         {
-            _logger = logger;
             _Configuration = configuration;
-            if (!string.IsNullOrWhiteSpace(_Configuration["Services:UoN.AccrediTool.Service:BaseUri"]))
-            {
-                Uri baseUri = new Uri(_Configuration["Services:UoN.AccrediTool.Service:BaseUri"], UriKind.Absolute);
-                Uri loginPath = new Uri(_Configuration["Services:UoN.AccrediTool.Service:LoginPath"], UriKind.Relative);
-                _client = new RestClient(baseUri, loginPath,
-                    new
-                    {
-                        Username = _Configuration["Services:UoN.AccrediTool.Service:LoginId"],
-                        Secret = _Configuration["Services:UoN.AccrediTool.Service:LoginSecret"]
-                    });
-            }
         }
 
         // public string StaticPath { get; set; }
@@ -46,32 +36,49 @@ namespace UoN.AccrediTool.Web.Pages
 
         public void OnGet()
         {
-            // StaticPath = _Configuration["Services:UoN.AccrediTool.Service:StaticPath"];
-            Program = _client?.Get<UoProgramModel>(new Uri(string.Join("/", _Configuration["Services:UoN.AccrediTool.Service:ProgramPath"], 1), UriKind.Relative));
 
-            // Temporary fix if program is not found
-            if (Program is null)
-            {
-                Program = new UoProgramModel();
-            }
         }
 
-        public void Dispose()
+        //returns a list of projects from the database between the upper and lower bounds
+        public ActionResult OnGetProjects(int lower, int upper)
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            upper++;
+            if(upper <= lower || lower < 0 || upper < 1) // prevent index out of bounds
+            {
+                return null;
+            }
+
+
+            List<UoProjectModel> projectModels = JsonConvert.DeserializeObject<List<UoProjectModel>>(API.API.GetJSON("projects/", _Configuration)); //get projects
+
+            projectModels.Reverse(); // reverse list, this will make the latest created project at index 0
+
+            if(projectModels.Count < upper)  // prevent index out of bounds
+            {
+                upper = projectModels.Count;
+            }
+
+            List<UoProjectModel> requestedProjectModels = new();
+
+            for(int i = lower; i < upper; i++) // Add all items between lower and upper to requestedProjectModels list.
+            {
+                requestedProjectModels.Add(JsonConvert.DeserializeObject<UoProjectModel>(API.API.GetJSON("projects/" + projectModels[i].ProjectId, _Configuration)));
+            }
+ 
+            return Content(JsonConvert.SerializeObject(requestedProjectModels)); // returns projects.
         }
 
-        protected virtual void Dispose(bool disposing)
+        // returns a specfic program
+        public ActionResult OnGetPrograms(int id)
         {
-            if (!disposed)
-            {
-                if (disposing)
-                {
-                    _client.Dispose();
-                }
-                disposed = true;
-            }
+            
+            return Content(JsonConvert.SerializeObject((JsonConvert.DeserializeObject<UoProgramModel>(API.API.GetJSON("programs/" + id, _Configuration)))));
+            
+
         }
+
+        
+
+
     }
 }

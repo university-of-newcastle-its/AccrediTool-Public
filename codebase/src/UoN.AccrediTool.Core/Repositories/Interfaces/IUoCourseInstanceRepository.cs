@@ -14,5 +14,6 @@ namespace UoN.AccrediTool.Core.Repositories
         Task<int?> SetCourseInstanceById(int id, UoCourseInstanceModel courseInstance);
         Task<int?> UpdateCourseInstanceById(int id, JObject patchObject);
         Task<int?> DeleteCourseInstanceById(int id);
+        void DeleteCourseInstanceByCourseId(int id);
     }
 }
