@@ -18,7 +18,7 @@ using Newtonsoft.Json.Linq;
 
 namespace UoN.AccrediTool.Web.Pages
 {
-   // [Authorize]
+    // [Authorize]
     public class ViewProjectModel : PageModel
     {
         private readonly IConfiguration _Configuration;
@@ -72,10 +72,12 @@ namespace UoN.AccrediTool.Web.Pages
         public IActionResult OnGetCourseList(int id)
         {
             List<UoCourseModel> courseModels = new();
+            UoCourseListModel courseList = JsonConvert.DeserializeObject<UoCourseListModel>(API.API.GetJSON("course-lists/" + id, _Configuration));
             var courseListJson = JsonConvert.DeserializeObject<JObject>(API.API.GetJSON("course-lists/" + id, _Configuration)).GetValue("courses");
             bool getCourses = true;
 
-
+            int courseListIndex = 0;
+            
             if(courseListJson.First != null)
             {
                 while(getCourses)
@@ -94,8 +96,8 @@ namespace UoN.AccrediTool.Web.Pages
                 }
             } 
 
-
-            return Content(JsonConvert.SerializeObject(courseListJson));
+            //courseListJson.AddAfterSelf(courseList.Name);
+            return Content(API.API.GetJSON("course-lists/" + id, _Configuration));
         }
 
 

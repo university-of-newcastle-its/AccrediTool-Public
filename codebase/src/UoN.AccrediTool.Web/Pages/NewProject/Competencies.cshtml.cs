@@ -15,7 +15,7 @@ using UoN.AccrediTool.Core.Models;
 
 namespace UoN.AccrediTool.Web.Pages
 {
-  //  [Authorize]
+    //  [Authorize]
     public class NewNodeModel : PageModel
     {
         [BindProperty]

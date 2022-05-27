@@ -20,7 +20,7 @@ using Newtonsoft.Json.Linq;
 
 namespace UoN.AccrediTool.Web.Pages.NewProject
 {
-   // [Authorize]
+    // [Authorize]
     public class SubmitProjectModel : PageModel
     {
         [BindProperty(SupportsGet = true)]
@@ -77,9 +77,16 @@ namespace UoN.AccrediTool.Web.Pages.NewProject
                 for (int i = 0; i < ProgramModel.Duration; i++)
                 {
                     string json = new JObject(new JProperty("position", i+1),
-                                    new JProperty("name", "Year " + (i+1) + " Directed Courses"),
+                                    new JProperty("name", "Year " + (i+1) + " Semester 1"),
                                     new JProperty("major", ProgramModel.Name),
                                     new JProperty("programId", ProgramModel.ProgramId)).ToString();
+
+                    CourseListModels.Add(JsonConvert.DeserializeObject<UoCourseListModel>(API.API.PostJSON(json, "course-lists", _Configuration)));
+
+                    json = new JObject(new JProperty("position", i+1),
+                            new JProperty("name", "Year " + (i+1) + " Semester 2"),
+                            new JProperty("major", ProgramModel.Name),
+                            new JProperty("programId", ProgramModel.ProgramId)).ToString();
 
                     CourseListModels.Add(JsonConvert.DeserializeObject<UoCourseListModel>(API.API.PostJSON(json, "course-lists", _Configuration)));
                 }
@@ -93,14 +100,21 @@ namespace UoN.AccrediTool.Web.Pages.NewProject
                     CourseListModels.Add(ProgramModel.ProgramStructure[i]);
                 }
 
-                if(ProgramModel.ProgramStructure.Count != ProgramModel.Duration)
+                if(ProgramModel.ProgramStructure.Count != ProgramModel.Duration * 2)
                 {
                     for(int i = ProgramModel.ProgramStructure.Count; i < ProgramModel.Duration; i++)
                     {
                         string json = new JObject(new JProperty("position", i+1),
-                                    new JProperty("name", "Year " + (i+1) + " Directed Courses"),
-                                    new JProperty("major", ProgramModel.Name),
-                                    new JProperty("programId", ProgramModel.ProgramId)).ToString();
+                                        new JProperty("name", "Year " + (i+1) + " Semester 1"),
+                                        new JProperty("major", ProgramModel.Name),
+                                        new JProperty("programId", ProgramModel.ProgramId)).ToString();
+
+                        CourseListModels.Add(JsonConvert.DeserializeObject<UoCourseListModel>(API.API.PostJSON(json, "course-lists", _Configuration)));
+
+                        json = new JObject(new JProperty("position", i+1),
+                                new JProperty("name", "Year " + (i+1) + " Semester 2"),
+                                new JProperty("major", ProgramModel.Name),
+                                new JProperty("programId", ProgramModel.ProgramId)).ToString();
 
                         CourseListModels.Add(JsonConvert.DeserializeObject<UoCourseListModel>(API.API.PostJSON(json, "course-lists", _Configuration)));
                     }
@@ -176,7 +190,7 @@ namespace UoN.AccrediTool.Web.Pages.NewProject
                 {
                     for (int j = 0; j < CourseListModels.Count; j++)
                     {
-                        if(CourseModels[i].Position < 8 * (j+1) && CourseModels[i].Position >= 8 * j)
+                        if(CourseModels[i].Position < 4 * (j+1) && CourseModels[i].Position >= 4 * j)
                         {
                             Joiner.CourseToCourseList(CourseModels[i], CourseListModels[j], _Configuration);
                         }
@@ -232,6 +246,7 @@ namespace UoN.AccrediTool.Web.Pages.NewProject
                     if(courseIds[i] != 0)
                     {
                         CourseModels.Add(JsonConvert.DeserializeObject<UoCourseModel>(API.API.GetJSON("courses/" + courseIds[i], _Configuration)));
+                        CourseModels[CourseModels.Count - 1].Position = i;
                     }
                    
                 }

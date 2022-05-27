@@ -6,6 +6,7 @@
 
 
   var courseIds = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+  var numOfCourseLists = 0;
 
   function getCourseList(listId)
   {
@@ -29,26 +30,11 @@
   {
     var courses = document.createElement("div")
 
-    if(response[0].position >= 0 && response[0].position < 8)
-    {
-      courses.id = "courses-year-1"
-      courses.innerHTML = "Year 1 courses"
-    }
-    else if(response[0].position >= 8 && response[0].position < 16)
-    {
-      courses.id = "courses-year-2"
-      courses.innerHTML = "Year 2 courses"
-    }
-    else if(response[0].position >= 16 && response[0].position < 24)
-    {
-      courses.id = "courses-year-3"
-      courses.innerHTML = "Year 3 courses"
-    }
-    else if(response[0].position >= 24 && response[0].position < 32)
-    {
-      courses.id = "courses-year-4"
-      courses.innerHTML = "Year 4 courses"
-    }
+    courses.id = response.name
+    courses.innerHTML = response.name
+
+    numOfCourseLists = numOfCourseLists + 1
+
     courses.className = "text-xl font-semibold"
 
     var tableHeaders = document.createElement("div")
@@ -58,27 +44,57 @@
 
     
 
-    for(let i = 0; i < response.length; i++)
+    for(let i = 0; i < response.courses.length; i++)
     {
       var course = document.createElement("div")
-      course.id = "course-" + response[i].position
+      course.id = "course-" + response.courses[i].position
       course.className = "grid grid-cols-10 border-b border-l border-r border-gray-200 px-5 py-2 shadow overflow-hidden align-middle"
 
       var courseCode = document.createElement("div")
-      courseCode.innerHTML = "<p>" + response[i].subject + response[i].catalogNumber  + "</p>"
+      courseCode.innerHTML = "<p>" + response.courses[i].subject + response.courses[i].catalogNumber  + "</p>"
       courseCode.className = "text-sm leading-5 font-medium text-gray-900 col-span-3"
 
 
       var name = document.createElement("div")
-      name.innerHTML = "<p>" +  response[i].name  + "</p>"
+      name.innerHTML = "<p>" +  response.courses[i].name  + "</p>"
       name.className = " text-sm leading-5 text-gray-500 col-span-6"
 
       
       var link = document.createElement("div")
-      link.innerHTML = "<p class=\"underline text-indigo-600 hover:text-indigo-900 text-sm cursor-pointer\" onclick=\"redirectOnClick("+response[i].id+")\">View Course</p>"
+      link.innerHTML = "<p class=\"underline text-indigo-600 hover:text-indigo-900 text-sm cursor-pointer\" onclick=\"redirectOnClick("+response.courses[i].id+")\">View Course</p>"
       link.className = "col-span-1"
 
-      courseIds[response[i].position] = response[i].id
+
+      switch (response.name)
+      {
+        case "Year 1 Semester 1":
+            courseIds[0 + i] = response.courses[i].id;
+            break;
+        case "Year 1 Semester 2":
+            courseIds[4 + i] = response.courses[i].id;
+            break;
+        case "Year 2 Semester 1":
+            courseIds[8 + i] = response.courses[i].id;
+            break;
+        case "Year 2 Semester 2":
+            courseIds[12 + i] = response.courses[i].id;
+            break;
+        case "Year 3 Semester 1":
+            courseIds[16 + i] = response.courses[i].id;
+            break;
+        case "Year 3 Semester 2":
+            courseIds[20 + i] = response.courses[i].id;
+            break;
+        case "Year 4 Semester 1":
+            courseIds[24 + i] = response.courses[i].id;
+            break;
+          case "Year 4 Semester 2":
+            courseIds[28 + i] = response.courses[i].id;
+            break;
+              
+
+      }
+
 
       course.insertAdjacentElement("beforeend", courseCode)
       course.insertAdjacentElement("beforeend", name)
@@ -95,7 +111,9 @@
   function sortCourses()
   {
 
-    var coursesYearsList = [document.getElementById("courses-year-1") , document.getElementById("courses-year-2"), document.getElementById("courses-year-3"), document.getElementById("courses-year-4")];
+    var coursesYearsList = [document.getElementById("Year 1 Semester 1"), document.getElementById("Year 1 Semester 2"), document.getElementById("Year 2 Semester 1"), document.getElementById("Year 2 Semester 2"),
+                            document.getElementById("Year 3 Semester 1"), document.getElementById("Year 3 Semester 2"), document.getElementById("Year 4 Semester 1"), document.getElementById("Year 4 Semester 2")]
+
 
     for(let i = 0; i < coursesYearsList.length; i++)
     {
@@ -137,81 +155,94 @@
     {
 
 
-      @if(@Model.programModels[i] != null)
-      {
+        @if(@Model.programModels[i] != null)
+        {
 
-        <script>
+          <script>
 
-          $(document).ready(function(){
-            @for(int j = 0; j < Model.programModels[i].ProgramStructure.Count; j++)
-            {
-              @Html.Raw("getCourseList(" + @Model.programModels[i].ProgramStructure[j].CourseListId + ") \n");
-            }
-          });
+            $(document).ready(function(){
+              @for(int j = 0; j < Model.programModels[i].ProgramStructure.Count; j++)
+              {
+                @Html.Raw("getCourseList(" + @Model.programModels[i].ProgramStructure[j].CourseListId + ") \n");
+              }
+            });
 
-        </script>
+          </script>
 
-      <div class="bg-white overflow-hidden shadow rounded-lg">
-        <div class="border-b border-gray-200 px-4 py-5 sm:px-6 container mx-auto">
-          <div class="grid grid-cols-10">
-            <h1 class="text-lg  col-span-8"><b>@Model.programModels[i].Name</b></h1>
-            <h1 class="border border-gray-400 hover:border-sky-700 uppercase rounded-lg px-3 bg-gray-200 align-middle text-center col-span-2 mx-10 cursor-pointer" onclick="editProgram(@Model.programModels[i].ProgramId, @Model.projectModel.ProjectId, @Model.levelCategoryJson)"> Edit Program</h1>
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="border-b border-gray-200 px-4 py-5 sm:px-6 container mx-auto">
+            <div class="grid grid-cols-10">
+              <h1 class="text-lg  col-span-8"><b>@Model.programModels[i].Name</b></h1>
+              <h1 class="border border-gray-400 hover:border-sky-700 uppercase rounded-lg px-3 bg-gray-200 align-middle text-center col-span-2 mx-10 cursor-pointer" onclick="editProgram(@Model.programModels[i].ProgramId, @Model.projectModel.ProjectId, @Model.levelCategoryJson)"> Edit Program</h1>
+            </div>
+            
+          </div>   
+
+          <div class="px-4 py-5 sm:px-6 container mx-auto grid grid-cols-2">
+            
+              <dl>
+                <dt class="text-sm leading-5 font-medium text-gray-500">Program code</dt>
+                <dd class="mt-1 text-sm leading-5 text-gray-900">@Model.programModels[i].ProgramCode</dd>
+              </dl>
+
+              <dl>
+                <dt class="text-sm leading-5 font-medium text-gray-500">Career</dt>
+                @if(Model.programModels[i].ProgramCareer != null)
+                {
+                  <dd class="mt-1 text-sm leading-5 text-gray-900">@Model.programModels[i].ProgramCareer.Name</dd>
+                }
+                
+              </dl>
+
+              <dl>
+                <dt class="text-sm leading-5 font-medium text-gray-500">Campus</dt>
+                @if(Model.programModels[i].Campus != null)
+                {
+                  <dd class="mt-1 text-sm leading-5 text-gray-900">@Model.programModels[i].Campus.Name</dd>
+                }
+                
+              </dl>
+
+
+              <dl>
+                <dt class="text-sm leading-5 font-medium text-gray-500">Start term</dt>
+                <dd class="mt-1 text-sm leading-5 text-gray-900">@Model.programModels[i].GetFirstYear() @Model.programModels[i].GetFirstTerm()</dd>
+              </dl>
+
+              <dl>
+                <dt class="text-sm leading-5 font-medium text-gray-500">Minimum units</dt>
+                <dd class="mt-1 text-sm leading-5 text-gray-900">@Model.programModels[i].MinUnits</dd>
+              </dl>
+
+              <dl>
+                <dt class="text-sm leading-5 font-medium text-gray-500">Max duration</dt>
+                <dd class="mt-1 text-sm leading-5 text-gray-900">@Model.programModels[i].MaxYears years</dd>
+              </dl>
+
+              <dl>
+                <dt class="text-sm leading-5 font-medium text-gray-500">Field of Education</dt>
+                @if(Model.programModels[i].FieldOfEducation != null)
+                {
+                  <dd class="mt-1 text-sm leading-5 text-gray-900">@Model.programModels[i].FieldOfEducation.Name</dd>
+                }
+                
+              </dl>
+          </div>
+        </div>
+        <br>
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+        
+          <div class="border-b border-gray-200 px-4 py-5 sm:px-6 container mx-auto">
+            <h2 class="text-lg"><b>Program Structure</b></h2>
+
           </div>
           
-        </div>   
-
-        <div class="px-4 py-5 sm:px-6 container mx-auto grid grid-cols-2">
-            <dl>
-              <dt class="text-sm leading-5 font-medium text-gray-500">Program code</dt>
-              <dd class="mt-1 text-sm leading-5 text-gray-900">@Model.programModels[i].ProgramCode</dd>
-            </dl>
-
-            <dl>
-              <dt class="text-sm leading-5 font-medium text-gray-500">Career</dt>
-              <dd class="mt-1 text-sm leading-5 text-gray-900">@Model.programModels[i].ProgramCareer.Name</dd>
-            </dl>
-
-            <dl>
-              <dt class="text-sm leading-5 font-medium text-gray-500">Campus</dt>
-              <dd class="mt-1 text-sm leading-5 text-gray-900">@Model.programModels[i].Campus.Name</dd>
-            </dl>
+          <div class="px-4 py-5 sm:px-6 container mx-auto " id="courses">
 
 
-            <dl>
-              <dt class="text-sm leading-5 font-medium text-gray-500">Start term</dt>
-              <dd class="mt-1 text-sm leading-5 text-gray-900">@Model.programModels[i].GetFirstYear() @Model.programModels[i].GetFirstTerm()</dd>
-            </dl>
-
-            <dl>
-              <dt class="text-sm leading-5 font-medium text-gray-500">Minimum units</dt>
-              <dd class="mt-1 text-sm leading-5 text-gray-900">@Model.programModels[i].MinUnits</dd>
-            </dl>
-
-            <dl>
-              <dt class="text-sm leading-5 font-medium text-gray-500">Max duration</dt>
-              <dd class="mt-1 text-sm leading-5 text-gray-900">@Model.programModels[i].MaxYears years</dd>
-            </dl>
-
-            <dl>
-              <dt class="text-sm leading-5 font-medium text-gray-500">Field of Education</dt>
-              <dd class="mt-1 text-sm leading-5 text-gray-900">@Model.programModels[i].FieldOfEducation.Name</dd>
-            </dl>
-        </div>
-      </div>
-      <br>
-      <div class="bg-white overflow-hidden shadow rounded-lg">
-       
-        <div class="border-b border-gray-200 px-4 py-5 sm:px-6 container mx-auto">
-          <h2 class="text-lg"><b>Program Structure</b></h2>
+          </div>
 
         </div>
-        
-        <div class="px-4 py-5 sm:px-6 container mx-auto " id="courses">
-
-
-        </div>
-
-      </div>
       }
 
     }

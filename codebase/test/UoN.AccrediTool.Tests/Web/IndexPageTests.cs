@@ -17,9 +17,8 @@ namespace UoN.AccrediTool.Tests.Web
         [Fact]
         public void IndexModelTest()
         {
-            var logger = Mock.Of<ILogger<IndexModel>>();
             var config = Mock.Of<IConfiguration>();
-            var pageModel = new IndexModel(logger, config);
+            var pageModel = new IndexModel(config);
             pageModel.OnGet();
         }
     }

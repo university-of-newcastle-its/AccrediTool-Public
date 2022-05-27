@@ -17,7 +17,7 @@ using UoN.AccrediTool.Core.Data;
 
 namespace UoN.AccrediTool.Web.Pages
 {
-   // [Authorize]
+    // [Authorize]
     public class TemplateInfoModel : PageModel
     {
 

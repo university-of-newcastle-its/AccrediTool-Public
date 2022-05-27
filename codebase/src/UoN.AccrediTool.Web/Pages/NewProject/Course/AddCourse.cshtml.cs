@@ -21,7 +21,7 @@ using UoN.AccrediTool.Web.Pages.Shared.Templates.EngineersAustralia;
 
 namespace UoN.AccrediTool.Web.Pages.NewProject.Course
 {
-   // [Authorize]
+    // [Authorize]
     public class AddCourseModel : PageModel
     {
 
@@ -102,6 +102,13 @@ namespace UoN.AccrediTool.Web.Pages.NewProject.Course
                 {
                     CourseModel = loadedCourseModel;
                     CourseCode = CourseModel.Subject + CourseModel.CatalogNumber;
+
+                    for(int i = 0; i < CourseModel.CourseInstances.Count; i++)
+                    {
+                        CourseModel.CourseInstances[i] = JsonConvert.DeserializeObject<UoCourseInstanceModel>(API.API.GetJSON("course-instances/" + CourseModel.CourseInstances[i].CourseInstanceId, _Configuration));
+                    }
+
+                    
                 }
                 else
                 {
@@ -214,7 +221,19 @@ namespace UoN.AccrediTool.Web.Pages.NewProject.Course
                 API.API.Delete("level-courses/" + loadedCourseId, _Configuration);
 
                 //remove existing course instance
-                API.API.Delete("course-instances/course/" + loadedCourseId, _Configuration);
+
+                for(int i = 0; i < CourseModel.CourseInstances.Count; i++)
+                {
+                    CourseModel.CourseInstances[i] = JsonConvert.DeserializeObject<UoCourseInstanceModel>(API.API.GetJSON("course-instances/" +  CourseModel.CourseInstances[i].CourseInstanceId, _Configuration));
+
+                    for(int j = 0; j < CourseModel.CourseInstances[i].LearningOutcomes.Count; j++)
+                    {
+                        API.API.Delete("learning-outcomes/" + CourseModel.CourseInstances[i].LearningOutcomes[j].LearningOutcomeId, _Configuration);
+                    }
+
+
+                    API.API.Delete("course-instances/" + CourseModel.CourseInstances[i].CourseInstanceId, _Configuration);
+                }
 
             }
             else // create a new course

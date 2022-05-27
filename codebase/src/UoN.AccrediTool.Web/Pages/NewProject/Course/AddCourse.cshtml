@@ -499,7 +499,7 @@
             addMapping()            
         }
 
-        setTimeout(function(){  fillMapping(response, nodeArr) }, 250) 
+        setTimeout(function(){  fillMapping(response, nodeArr) }, 125 * response.length) 
     }
 
     function fillMapping(response, nodeArr)
@@ -703,6 +703,45 @@
                     <h3 class="px-6 py-3 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider col-span-3 bg-gray-50 align-middle">Assessment Type</h3>
                 </div>
 
+                @if(Model.loadCourse)
+                {
+                    if(Model.CourseModel.CourseInstances != null)
+                    {
+                        for(int i = 0; i < Model.CourseModel.CourseInstances[0].Assessments.Count; i++)
+                        {
+                            
+                            <div class="grid grid-cols-3" id="Assessment_Num_@i">
+                                <div class="grid grid-cols-10" >
+                                        <div class="col-span-1 p-2 border-r border-l border-b">
+                                            <input type="checkbox" id="Assessment_Selected_@i">
+                                        </div>
+
+                                        <div class="col-span-9 border-b align-middle w-full h-full">
+                                            <input type="text" name="assessmentModels[@i].Name" id="assessmentModels[@i].Name" class="w-full h-full" value="@Model.CourseModel.CourseInstances[0].Assessments[i].Name">
+                                        </div>
+                                    
+                                </div >
+
+                                <div class="border-l border-b align-middle ">
+                                    <input type="text" name="assessmentModels[@i].Weight" id="assessmentModels[@i].Weight" class="w-full h-full" value="@Model.CourseModel.CourseInstances[0].Assessments[i].Weight">
+                                </div>
+
+                                <div class="border-l border-b border-r align-middle">
+                                    <select name="assessmentModels[@i].AssessmentTypeId" id="assessmentModels[@i].AssessmentTypeId" class="w-full h-full"> 
+                                        <option value="@Model.CourseModel.CourseInstances[0].Assessments[i].AssessmentType.AssessmentTypeId">@Model.CourseModel.CourseInstances[0].Assessments[i].AssessmentType.Name</option>
+                                        @for(int j = 0; j < Model.AssessmentTypeModels.Count; j++)
+                                        {
+                                            <option value="@Model.AssessmentTypeModels[j].AssessmentTypeId">@Model.AssessmentTypeModels[j].Name</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <input type="hidden" value="@(i+1)" name="assessmentModels[@i].Position"  id="assessmentModels[@i].Position">
+                            </div>
+                            @(Model.NumOfAssessments = i)
+                        }
+                    }
+                }
             </div>
 
         </div>
@@ -727,6 +766,31 @@
                 <div class="grid grid-cols-1 w-90 h-12 border-b border-gray-200 bg-gray-50">
                     <h3 class="px-6 py-3 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider col-span-1 bg-gray-50 align-middle">Learning Outcomes</h3>
                 </div>
+
+                @if(Model.loadCourse)
+                {
+                    if(Model.CourseModel.CourseInstances != null)
+                    {
+                        for(int i = 0; i < Model.CourseModel.CourseInstances[0].LearningOutcomes.Count; i++)
+                        {
+                            <div class="grid grid-cols-10" id="LearningOutcome_Num_@i">
+                                <div class="col-span-1 p-2 border-r border-l border-b grid grid-cols-2">
+                                    <input type="checkbox" id="LearningOutcome_Selected_@i">
+                                </div>
+
+                                <div class="col-span-9 border-b border-r align-middle w-full h-full">
+                                    <input type="text" name="learningOutcomeModels[@i].Name" id="learningOutcomeModels[@i].Name" value="@Model.CourseModel.CourseInstances[0].LearningOutcomes[@i].Name" class="w-full h-full">
+                                </div>
+
+                                <input type="hidden" value="@(i+1)" name="learningOutcomeModels[@i].Position"  id="learningOutcomeModels[@i].Position">
+                            </div>
+                            @(Model.NumOfLearningOutcome = i)
+                        }
+
+                    }
+
+                }
+
 
             </div>
 

@@ -2,15 +2,16 @@
 @model UoN.AccrediTool.Web.Pages.NewProject.Course.CourseListModel
 @{
 }
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://kit.fontawesome.com/b5caa54bd2.js" crossorigin="anonymous"></script>
 <script>
+    Pos = 0
+    Year = 0
+    Sem = 0
 
-    function AddCourse(Pos, Year, Sem)
+    function AddCourse()
     {
-
         window.location.href = "AddCourse?handler=Position&Pos=" + Pos + "&Year="+ Year + "&Semester=" + Sem + "&programId=" + @Model.programId + "&projectId=" + @Model.projectId + "&CourseListJson=[" + @Model.CourseListJson + "]&LevelCategoryJson=[" + @Model.LevelCategoryJson + "]" ;
-    
-    
     }
 
     function OpenCourse(courseId)
@@ -23,9 +24,152 @@
         window.location.href = "AddCourse?handler=Position&Pos=" + Pos + "&Year="+ Year + "&Semester=" + Sem + "&programId=" + @Model.programId + "&projectId=" + @Model.projectId + "&CourseListJson=[" + @Model.CourseListJson + "]&LevelCategoryJson=[" + @Model.LevelCategoryJson + "]&loadCourse=true&loadedCourseId=" + courseId ;
     }
 
+    function updatedSelectedCourse(givenPos, givenYear, givenSem)
+    {
+        Pos = givenPos
+        Year = givenYear
+        Sem = givenSem
+    }
+
+    function overlayOn(Pos, Year, Sem)
+    {
+        updatedSelectedCourse(Pos, Year, Sem)
+        document.getElementById("overlay").className = "w-full h-full fixed block top-0 left-0 z-50"
+        document.getElementById("courseOverlayButton").onclick = function() {AddCourse()}
+        document.getElementById("addExistingCourseButton").onclick = function() {addExistingCourse()}
+    }
+
+    function overlayOff()
+    {
+        document.getElementById("overlay").className = "hidden"
+        document.getElementById("existingCourses").value = ""
+
+        courseCode = document.getElementById("existingCourseCode").innerHTML = "No course selected."
+        courseName = document.getElementById("existingCourseName").innerHTML = "No course selected."
+    }
+
+    function getExistingCourseInfo()
+    {
+        $.ajax({
+            type: "GET",
+            url: "CourseList?handler=CourseInfo",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("XSRF-TOKEN",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            data: "existingCourseId=" + document.getElementById("existingCourses").value,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function(response){
+                    updateExistingCourseInfo(response);
+            }
+        });
+
+
+        
+    }
+
+    function updateExistingCourseInfo(response)
+    {
+        courseCode = document.getElementById("existingCourseCode")
+        courseName = document.getElementById("existingCourseName")
+
+        courseCode.innerHTML = response[1]
+        courseName.innerHTML = response[0]
+    }
+
+    function addExistingCourse()
+    {
+       
+        $.ajax({
+            type: "POST",
+            url: "CourseList?handler=AddExistingCourse",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("XSRF-TOKEN",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            data: {
+                existingCourseId: document.getElementById("existingCourses").value,
+                pos: Pos,
+                sem: Sem,
+                year: Year,
+                programId: @Model.programId,
+                projectId: @Model.projectId,
+                LevelCategoryJson: "@Model.LevelCategoryJson",
+                CourseListJson: "@Model.CourseListJson"
+
+            },
+            contentType: "application/x-www-form-urlencoded",
+            dataType: "text",
+            success: function(response)
+            {
+                window.location.replace(window.location.protocol + "//"+ window.location.host + window.location.pathname + response);   
+            }              
+        });
+
+
+
+    }
+
 
 </script>
+<div id="overlay" class="hidden" style="background-color: rgba(0,0,0,0.7)">
+    <div class="w-full h-full grid grid-cols-10 grid-rows-3 pr-4">
+        <div class="bg-white overflow-hidden shadow rounded-lg object-center col-start-5 col-span-3 row-start-2 w-full block h-80">
+            <div class="border-b border-gray-200 px-4 py-5 sm:px-6 grid grid-cols-2">
+                <h1>Add Course</h1>
+                <div class="" onclick="overlayOff()">
+                    <i class="fa-solid fa-xmark float-right cursor-pointer"></i>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 h-full">
+                <div class="border-r border-gray-200 h-full p-4">
+                    <h2>Create a new course:</h2>
 
+                    <div class="border border-gray-300 align-middle text-center h-48 w-full cursor-pointer hover:border-blue-500 py-20" onclick="" id="courseOverlayButton">New Course</div>
+                </div>
+                <div class="p-4">
+                    <h2>Add an existing course:</h2>
+                    @if(Model.existingCourses != null)
+                    {
+                        <input list="existingCoursesList" id="existingCourses" class="border border-gray-300 hover:border-blue-500 w-full" onChange="getExistingCourseInfo()">
+                            <datalist id="existingCoursesList">
+                                @for(int i = 0; i < Model.existingCourses.Count; i++)
+                                {
+                                    <option value="@Model.existingCourses[i].CourseId" > @Model.existingCourses[i].Name </option>
+                                }
+                            </datalist>
+
+                        <br>
+                        <div>
+                            <h3>Course Infomation: <h3>
+                            <p> Course Code: <div id="existingCourseCode"> No course selected.</div> </p>
+                            <p> Course Name:  <div id="existingCourseName"> No course selected.</div></p>
+                            <br>
+                            <div class="grid grid-cols-10">
+                                <div onclick="" class="border border-gray-300 hover:border-blue-500 w-24 cursor-pointer col-start-8 align-middle text-center" id="addExistingCourseButton">Add Course </div>
+                            </div>
+                            
+                        </div>
+                       
+                    }
+                    else
+                    {
+                        <p>No existing courses in database</p>
+                    }
+
+
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+
+</div>
 <section class="py-4">
     <div class="bg-white overflow-hidden shadow rounded-lg">
         <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
@@ -51,7 +195,7 @@
                         {
                             if (Model.CourseModels[((i) * 8) + j] == null)
                             {
-                                 <div class="col-span-2 border border-gray-300 align-middle text-center m-12 h-24 w-36 pt-8 cursor-pointer hover:border-blue-500" onclick="AddCourse(@j, @(i+1), 1)">
+                                 <div class="col-span-2 border border-gray-300 align-middle text-center m-12 h-24 w-36 pt-8 cursor-pointer hover:border-blue-500" onclick="overlayOn(@j, @(i+1), 1)">
                                         Add Course                                                     
                                 </div>     
                             }
@@ -85,7 +229,7 @@
                         {
                              if (Model.CourseModels[((i) * 8) + 4 + j] == null)
                             {
-                                 <div class="col-span-2 border border-gray-300 align-middle text-center m-12 h-24 w-36 pt-8 cursor-pointer hover:border-blue-500" onclick="AddCourse(@j, @(i+1), 2)">
+                                 <div class="col-span-2 border border-gray-300 align-middle text-center m-12 h-24 w-36 pt-8 cursor-pointer hover:border-blue-500" onclick="overlayOn(@j, @(i+1), 2)">
                                         Add Course                                                     
                                 </div>     
                             }

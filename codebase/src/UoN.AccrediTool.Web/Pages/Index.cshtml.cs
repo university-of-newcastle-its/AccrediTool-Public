@@ -17,7 +17,7 @@ using Newtonsoft.Json.Linq;
 
 namespace UoN.AccrediTool.Web.Pages
 {
-   // [Authorize]
+    //[Authorize]
     public class IndexModel : PageModel
     {
         private readonly IConfiguration _Configuration;
@@ -50,22 +50,29 @@ namespace UoN.AccrediTool.Web.Pages
 
 
             List<UoProjectModel> projectModels = JsonConvert.DeserializeObject<List<UoProjectModel>>(API.API.GetJSON("projects/", _Configuration)); //get projects
-
-            projectModels.Reverse(); // reverse list, this will make the latest created project at index 0
-
-            if(projectModels.Count < upper)  // prevent index out of bounds
+            if(projectModels != null)
             {
-                upper = projectModels.Count;
+                projectModels.Reverse(); // reverse list, this will make the latest created project at index 0
+
+                if(projectModels.Count < upper)  // prevent index out of bounds
+                {
+                    upper = projectModels.Count;
+                }
+
+                List<UoProjectModel> requestedProjectModels = new();
+
+                for(int i = lower; i < upper; i++) // Add all items between lower and upper to requestedProjectModels list.
+                {
+                    requestedProjectModels.Add(JsonConvert.DeserializeObject<UoProjectModel>(API.API.GetJSON("projects/" + projectModels[i].ProjectId, _Configuration)));
+                }
+    
+                return Content(JsonConvert.SerializeObject(requestedProjectModels)); // returns projects.
+            }
+            else
+            {
+                return Content(null);
             }
 
-            List<UoProjectModel> requestedProjectModels = new();
-
-            for(int i = lower; i < upper; i++) // Add all items between lower and upper to requestedProjectModels list.
-            {
-                requestedProjectModels.Add(JsonConvert.DeserializeObject<UoProjectModel>(API.API.GetJSON("projects/" + projectModels[i].ProjectId, _Configuration)));
-            }
- 
-            return Content(JsonConvert.SerializeObject(requestedProjectModels)); // returns projects.
         }
 
         // returns a specfic program
@@ -77,7 +84,6 @@ namespace UoN.AccrediTool.Web.Pages
 
         }
 
-        
 
 
     }

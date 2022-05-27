@@ -178,10 +178,14 @@
                         <input type="text" asp-for="ProjectModel.Name" class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300" name="ProjectModel.Name">
                         <select asp-for="ProjectModel.FrameworkId"  class="rounded-lg border-solid border-2 border-black-500 focus:border-blue-300" name="ProjectModel.FrameworkId"> 
                             @* <option value="0">New Framework</option> *@
-                            @for(int i = 0; i < @Model.FrameworkModels.Count; i++)
+                            @if(@Model.FrameworkModels != null)
                             {
-                                <option value ="@Model.FrameworkModels[i].FrameworkId">@Model.FrameworkModels[i].Name</option>
+                                @for(int i = 0; i < @Model.FrameworkModels.Count; i++)
+                                {
+                                    <option value ="@Model.FrameworkModels[i].FrameworkId">@Model.FrameworkModels[i].Name</option>
+                                }
                             }
+
                         </select>
 
                         <label for="description">Description: </label><br>
