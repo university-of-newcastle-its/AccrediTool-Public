@@ -93,8 +93,9 @@ namespace UoN.AccrediTool.Web.Pages.NewProject.Course
 
         public void OnGet()
         {
+            AssessmentTypeModels = JsonConvert.DeserializeObject<List<UoAssessmentTypeModel>>(API.API.GetJSON("assessment-types", _Configuration));
 
-            if(loadCourse)
+            if (loadCourse)
             {
                 UoCourseModel loadedCourseModel = JsonConvert.DeserializeObject<UoCourseModel>(API.API.GetJSON("courses/" + loadedCourseId, _Configuration));
 
@@ -157,8 +158,10 @@ namespace UoN.AccrediTool.Web.Pages.NewProject.Course
   
         }
 
-        public IActionResult OnPostSubmit(List<CourseMappings> courseMappings, List<UoAssessmentModel> assessmentModels, List<UoLearningOutcomeModel> learningOutcomeModels)
+        public IActionResult OnPostSubmit(List<CourseMappings> courseMappings, List<UoAssessmentModel> assessmentModels, List<UoLearningOutcomeModel> learningOutcomeModels, List<UoDocumentModel> documents)
         {
+
+           
 
             //get program
             UoProgramModel programModel = JsonConvert.DeserializeObject<UoProgramModel>(API.API.GetJSON("programs/" + programId, _Configuration));
@@ -226,9 +229,19 @@ namespace UoN.AccrediTool.Web.Pages.NewProject.Course
                 {
                     CourseModel.CourseInstances[i] = JsonConvert.DeserializeObject<UoCourseInstanceModel>(API.API.GetJSON("course-instances/" +  CourseModel.CourseInstances[i].CourseInstanceId, _Configuration));
 
+                    //remove learing outcomes
                     for(int j = 0; j < CourseModel.CourseInstances[i].LearningOutcomes.Count; j++)
                     {
                         API.API.Delete("learning-outcomes/" + CourseModel.CourseInstances[i].LearningOutcomes[j].LearningOutcomeId, _Configuration);
+                    }
+                    //remove assessments
+                    for(int j = 0; j < CourseModel.CourseInstances[i].Assessments.Count; j++)
+                    {
+                        for(int k = 0; k < CourseModel.CourseInstances[i].Assessments[j].Documents.Count; k++)
+                        {
+                            API.API.Delete("documents/" + CourseModel.CourseInstances[i].Assessments[j].Documents[k].DocumentId, _Configuration);
+                        }
+                        API.API.Delete("assessments/" + CourseModel.CourseInstances[i].Assessments[j].AssessmentId, _Configuration);
                     }
 
 
@@ -248,7 +261,7 @@ namespace UoN.AccrediTool.Web.Pages.NewProject.Course
                 CourseModels[index] = CourseModel;
                 courseIds[index] = CourseModel.CourseId;
 
-            // create course comp mappings || TODO: this needs to have better supoort for templates.
+            // create course comp mappings
             if (courseMappings != null)
             {
                 for (int i = 0; i < courseMappings.Count; i++)
@@ -341,7 +354,6 @@ namespace UoN.AccrediTool.Web.Pages.NewProject.Course
 
                 // join course and comp and levels in joining table
                 API.Joiner.CourseToCompToLevels(LevelCoursesJoins, _Configuration);
-
             }
 
             CourseListJson = JsonConvert.SerializeObject(courseIds);
@@ -354,36 +366,11 @@ namespace UoN.AccrediTool.Web.Pages.NewProject.Course
 
             int termCode = 0;
 
-            for(int i = 0; i < assessmentModels.Count; i++)
-            {
-                if(assessmentModels[i].Name == "remove")
-                {
-                    assessmentModels.RemoveAt(i);
-                    i--;
-                }
-            }            
-            
-            
-            for(int i = 0; i < learningOutcomeModels.Count; i++)
-            {
-                if(learningOutcomeModels[i].Name == "remove")
-                {
-                    learningOutcomeModels.RemoveAt(i);
-                    i--;
-                }
-            }
 
-        
             for(int i = 0; i < assessmentModels.Count; i++)
             {
                 assessmentModels[i].Position = i +1;
             }            
-            
-            
-            for(int i = 0; i < learningOutcomeModels.Count; i++)
-            {
-                learningOutcomeModels[i].Position = i +1;
-            }
 
 
             if(Semester == 1)
@@ -397,13 +384,15 @@ namespace UoN.AccrediTool.Web.Pages.NewProject.Course
 
             JObject json = new(new JProperty("termCode", termCode),
                             new JProperty("year", Year),
-                            new JProperty("assessments", 
+                            new JProperty("assessments",
                             new JArray(
                                     from a in assessmentModels
                                     select new JObject(
                                         new JProperty("position", a.Position),
                                         new JProperty("name", a.Name),
                                         new JProperty("weight", a.Weight),
+                                        new JProperty("purpose", a.Purpose),
+                                        new JProperty("description", a.Description),
                                         new JProperty("assessmentTypeId", a.AssessmentTypeId)))),
                             new JProperty("learningOutcomes",
                             new JArray(
@@ -417,7 +406,39 @@ namespace UoN.AccrediTool.Web.Pages.NewProject.Course
 
 
 
-            string tmp = API.API.PostJSON(json.ToString(), "course-instances", _Configuration);
+            UoCourseInstanceModel courseInstance = JsonConvert.DeserializeObject<UoCourseInstanceModel>(API.API.PostJSON(json.ToString(), "course-instances", _Configuration));
+
+            //post documents associated with assessments
+            if (documents != null)
+            {
+                for (int i = 0; i < documents.Count; i++)
+                {
+                    for (int j = 0; j < courseInstance.Assessments.Count; j++)
+                    {
+                        if (documents[i].AssessmentId == j)
+                        {
+                            int assessmentId = courseInstance.Assessments[j].AssessmentId;
+
+                            json = new JObject(new JProperty("uri", documents[i].URI),
+                                new JProperty("name", documents[i].Name),
+                                new JProperty("fileExtension", "pdf"),
+                                new JProperty("type", documents[i].Type),
+                                new JProperty("assessmentId", assessmentId));
+
+                            if (documents[i].Type == UoDocumentType.WorkSample)
+                            {
+                                json.Add(new JProperty("grade", documents[i].Grade));
+                            }
+
+                            API.API.PostJSON(json.ToString(), "documents/", _Configuration);
+                        }
+                    }
+                }
+            }
+
+
+
+
 
             return RedirectToPage("CourseList", new{programId = programId, projectId = projectId, CourseListJson = CourseListJson, LevelCategoryJson = LevelCategoryJson});
 
@@ -447,22 +468,34 @@ namespace UoN.AccrediTool.Web.Pages.NewProject.Course
 
             if(loadCourse)
             {
-                JArray json = JsonConvert.DeserializeObject<JArray>(API.API.GetJSON("level-courses/" + courseId, _Configuration));
-
-                for(int i = 0; i < json.Count; i++)
+                string levels = API.API.GetJSON("level-courses/" + courseId, _Configuration);
+                if (levels != null)
                 {
-                    int levelId = json[i].Last.Previous.Last.Value<int>();
+                    JArray json = JsonConvert.DeserializeObject<JArray>(levels);
 
-                    UoLevelModel level = JsonConvert.DeserializeObject<UoLevelModel>(API.API.GetJSON("levels/" + levelId, _Configuration));
+                    for (int i = 0; i < json.Count; i++)
+                    {
+                        int levelId = json[i].Last.Previous.Last.Value<int>();
+
+                        UoLevelModel level = JsonConvert.DeserializeObject<UoLevelModel>(API.API.GetJSON("levels/" + levelId, _Configuration));
 
 
-                    json[i].Last.AddAfterSelf(JToken.Parse("{ \"levelCatName\" : \"" + level.LevelCategory.Name + "\"}").First);
-                    json[i].Last.AddAfterSelf(JToken.Parse("{ \"levelName\" : \"" + level.Name + "\"}").First);
+                        json[i].Last.AddAfterSelf(JToken.Parse("{ \"levelCatName\" : \"" + level.LevelCategory.Name + "\"}").First);
+                        json[i].Last.AddAfterSelf(JToken.Parse("{ \"levelName\" : \"" + level.Name + "\"}").First);
 
 
+                    }
+
+                    return Content(json.ToString());
+                }
+                else
+                {
+                    return Content(null);
                 }
 
-                return Content(json.ToString());
+                
+
+
             }
             else
             {

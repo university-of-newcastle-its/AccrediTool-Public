@@ -56,34 +56,6 @@
                 </a>
             }
         </div>
-        <div class="px-4 py-5 sm:px-6">
-            <div class="grid grid-cols-1 col-gap-4 row-gap-8 sm:grid-cols-3">
-                <dl class="sm:col-span-1 pb-3 sm:pb-0">
-                    <dt class="text-sm leading-5 font-medium text-gray-500">
-                        Year
-                    </dt>
-                    <dd class="mt-1 text-sm leading-5 text-gray-900">
-                        @Model.Year
-                    </dd>
-                </dl>
-                <dl class="sm:col-span-1 pb-3 sm:pb-0">
-                    <dt class="text-sm leading-5 font-medium text-gray-500">
-                        Term
-                    </dt>
-                    <dd class="mt-1 text-sm leading-5 text-gray-900">
-                        @Model.GetTerm()
-                    </dd>
-                </dl>
-                <dl class="sm:col-span-1">
-                    <dt class="text-sm leading-5 font-medium text-gray-500">
-                        Campus
-                    </dt>
-                    <dd class="mt-1 text-sm leading-5 text-gray-900">
-                        @Model.Campus.Name
-                    </dd>
-                </dl>
-            </div>
-        </div>
     </div>
 </section>
 @if (Model.Documents.Count > 0)

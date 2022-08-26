@@ -15,5 +15,6 @@ namespace UoN.AccrediTool.Core.Repositories
         Task<int?> SetProgramById(int id, UoProgramModel program);
         Task<int?> UpdateProgramById(int id, JObject patchObject);
         Task<int?> DeleteProgramById(int id);
+        Task<UoProjectModel> GetProjectById(int id);
     }
 }

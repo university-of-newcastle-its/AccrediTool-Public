@@ -6,126 +6,11 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
 
-    let nextLower = 0;
-    let nextUpper = 0;
-    let projectsLoaded = 0;
 
 function viewProject(projectId)
 {
   window.location.href = "/View/Project?projectId=" + projectId;
 }
-
-function loadProjects(projects)
-{
-
-
-  for(let i = projectsLoaded; i < (projects.length + projectsLoaded); i++)
-  {
-
-    let slot = document.getElementById("project-slot-" + i)
-
-    if(typeof(slot) == "undefined" || slot == null)
-    {
-      createSlot(i);
-      slot = document.getElementById("project-slot-" + i)
-    }
-
-    
-    slot.setAttribute("onclick","viewProject("+ projects[i - projectsLoaded].id +")");
-    slot.className = "h-64 border border-gray-200 cursor-pointer hover:border-blue-500 bg-gray-100 px-6"
-    slot.innerHTML = "<h2 class=\"text-center text-blue-700\"><b> " + projects[i - projectsLoaded].Name + " </b></h2> <br>"
-
-    for(let j = 0; j < projects[i - projectsLoaded].ProjectPrograms.length; j++)
-    {
-      program = getProgram(projects[i - projectsLoaded].ProjectPrograms[j].ProgramId)
-
-
-      slot.innerHTML = slot.innerHTML + "<h3 class=\"text-center text-sm text-gray-700 \"><b>" + program.Name + " | " +  program.ProgramCode + "</b></h3>"
-
-      slot.innerHTML = slot.innerHTML + "<br>"
-
-      if(program.FieldOfEducation != null)
-      {
-          slot.innerHTML = slot.innerHTML + "<h4 class=\"text-sm text-gray-700\">Field of Education: " + program.FieldOfEducation.Name + "</h4>"
-      }
-
-      
-      slot.innerHTML = slot.innerHTML + "<h4 class=\"text-sm text-gray-700 \" >Program Stucture:</h4>"
-      slot.innerHTML = slot.innerHTML + "<p class=\"hidden\" id=\"" + "\">"
-
-    }
-
-    
-  }
-
-  projectsLoaded = projectsLoaded + projects.length;
-
-}
-
-function createSlot(index)
-{
-  slotGrid = document.getElementById("slot-grid");
-
-  var slot = document.createElement("div");
-
-  slot.id = "project-slot-" + index;
-
-  slotGrid.insertAdjacentHTML("beforeend", slot.outerHTML)
-
-}
-
-function getProgram(id)
-{
-  var data;
-
-  $.ajax({
-      type: "Get",
-      async: false,
-      url: "Index?handler=Programs",
-      beforeSend: function (xhr) {
-          xhr.setRequestHeader("XSRF-TOKEN",
-              $('input:hidden[name="__RequestVerificationToken"]').val());
-      },
-      data: "id=" + id,
-      contentType: "application/json; charset=utf-8",
-      dataType: "json",
-      success: function(response) {data = response;}
-    });
-
-    return data;
-
-  
-}
-
-function getProjects(lower, upper)
-{
-
-  nextLower = upper+1
-  nextUpper = nextLower + 11
-  
-
-  $.ajax({
-    type: "Get",
-    url: "Index?handler=Projects",
-    beforeSend: function (xhr) {
-        xhr.setRequestHeader("XSRF-TOKEN",
-            $('input:hidden[name="__RequestVerificationToken"]').val());
-    },
-    data: "lower=" + lower + "&upper=" + upper,
-    contentType: "application/json; charset=utf-8",
-    dataType: "json",
-    success: function(response){
-            loadProjects(response);
-    }
-  });
-
-}
-
-
-$(document).ready(function(){
-  getProjects(0, 11);
-});
-  
 
 
 </script>
@@ -134,21 +19,13 @@ $(document).ready(function(){
   <div class="bg-white overflow-hidden shadow rounded-lg">
       <div class="px-4 py-5 sm:px-6 container mx-auto">
         <div class="grid grid-cols-3 gap-x-10 gap-y-5" id="slot-grid">
-          @for(int i = 0; i < 12; i++)
+          @for(int i = 0; i < Model.ProjectModels.Count; i++)
           {
-            <div class="h-64 border border-gray-200 animate-pulse bg-gray-100" id="project-slot-@i">
-               <div class="h-4 bg-gray-300 rounded-full mx-24 my-2"></div>
-               <br>
-               <div class="h-4 bg-gray-300 rounded-full mx-24 "></div>
-               <br>
-               <div class="h-4 bg-gray-300 rounded-full mx-6"></div>
-               <br>
-               <div class="h-4 bg-gray-300 rounded-full mx-6 my-1"></div>
-               <div class="h-4 bg-gray-300 rounded-full mx-6 my-1"></div>
-               <div class="h-4 bg-gray-300 rounded-full mx-6 my-1"></div>
 
-
+            <div class="h-16 border border-gray-200 cursor-pointer hover:border-blue-500 bg-gray-100 px-6" id="project-slot-@i" onclick="viewProject(@Model.ProjectModels[i].ProjectId)">
+                <h2 class="text-center text-blue-700"><b> @Model.ProjectModels[i].Name </b></h2> 
             </div>
+                
           }
 
 
@@ -159,11 +36,7 @@ $(document).ready(function(){
 
 
         <div class="border-b border-gray-200 px-4 py-5 sm:px-6 container mx-auto grid grid-cols-3 place-items-center">
-          <div class="col-span-1"></div>
-          <div  onclick="getProjects(nextLower, nextUpper)" class="cursor-pointer border border-gray-400 uppercase rounded-lg p-3 bg-gray-200 align-middle text-center m-3 hover:border-blue-500">
-              <h3><b>Load More Projects</b></h3>
-          </div>
-         
+          <div class="col-span-1"></div>         
         </div>
         
 

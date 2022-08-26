@@ -12,7 +12,7 @@ using UoN.AccrediTool.Core.Utility;
 
 namespace UoN.AccrediTool.Web.Pages
 {
-     [Authorize]
+     // [Authorize]
     public class CourseModel: PageModel, IDisposable
     {
         private readonly ILogger<CourseModel> _logger;

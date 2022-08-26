@@ -261,5 +261,30 @@ namespace UoN.AccrediTool.Core.Repositories
             }
             return null;
         }
+
+        public async Task<UoProjectModel> GetProjectById(int id)
+        {
+            try
+            {
+                UoProjectModel projectItem = await _context.Project
+                    .Include(project => project.Framework)
+                        .ThenInclude(framework => framework.Nodes)
+                    .Include(project => project.ProjectPrograms)
+                    .Include(project => project.ProjectUserGroups)
+                    .SingleAsync(project => project.ProjectId == id)
+                    .ConfigureAwait(false);
+
+                UoNodeModel[] nodes = new UoNodeModel[projectItem.Framework.Nodes.Count];
+                projectItem.Framework.Nodes.CopyTo(nodes, 0);
+                projectItem.Framework.Nodes.Clear();
+                projectItem.Framework.Nodes.AddRange(await UoCoreRepositories.GetChildNodes(_context, nodes, false).ConfigureAwait(false));
+
+                return projectItem;
+            }
+            catch (System.InvalidOperationException)
+            {
+                return await _context.Project.FindAsync(id).ConfigureAwait(false);
+            }
+        }
     }
 }

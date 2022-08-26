@@ -135,6 +135,11 @@ namespace UoN.AccrediTool.Service.Controllers
                 if (int.TryParse(projectId, out int project))
                 {
                     ViewData["ProjectId"] = project;
+                    if(Repository.GetProjectById(project).Result is UoProjectModel projectModel)
+                    {
+                        ViewData["Project"] = projectModel;
+                    }
+                    
                 }
                 if (template != "Universal" && !UoServiceControllers.validTemplates.Contains(template))
                 {

@@ -1,3 +1,9 @@
+/**------------------------------------------------------------------------
+ * ?                                ABOUT
+ * @repo           : AccrediTool
+ * @description    : This PageModel allows the user to create a new project
+ *                 : and program 
+ *------------------------------------------------------------------------**/
 using System;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc;
@@ -56,6 +62,13 @@ namespace UoN.AccrediTool.Web.Pages
             FieldOfEducationModels = JsonConvert.DeserializeObject<List<UoFieldOfEducationModel>>(API.API.GetJSON("fields-of-education", _Configuration));
         }
 
+
+        /**========================================================================
+         **                           OnPostSubmit
+         *?  This functions is called when a user submits a HTML form. It creates a new
+         *   project and then redirects to the NewProject/TemplateInfo page
+         *@return ActionResult | NewProject/TemplateInfo
+         *========================================================================**/
         public ActionResult OnPostSubmit()
         {
 
@@ -87,21 +100,8 @@ namespace UoN.AccrediTool.Web.Pages
             //Response.Cookies.Append("programIdCookie", JsonConvert.SerializeObject(ProgramModel[0].ProgramId, Formatting.None).ToString());
 
             return RedirectToPage("NewProject/TemplateInfo", new {programId = ProgramModel[0].ProgramId});
-
-
-
-
-
-            
-
-
         }
-
-        public void OnGetInvalidSubmit()
-        {
-            IsValid = false;
-        }
-
+        /*---------------------------- END OF FUNCTION ----------------------------*/
 
         public void OnPostAddProgramCount()
         {
@@ -115,7 +115,6 @@ namespace UoN.AccrediTool.Web.Pages
 
         public void OnGet()
         {
-
 
             ProgramCount = 1;
             OnPostAddProgramCount();

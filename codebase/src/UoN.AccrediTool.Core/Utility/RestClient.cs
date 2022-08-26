@@ -148,19 +148,15 @@ namespace UoN.AccrediTool.Core.Utility
         public async void GetFile(Uri path, int projectId)
         {
 
-            if(!System.IO.Directory.Exists("projects"))
-            {
-                System.IO.Directory.CreateDirectory("projects");
-            }
-
-
-            if(!string.IsNullOrEmpty(_token))
+            if (!string.IsNullOrEmpty(_token))
             {
                 _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_tokenType, _token);
             }
 
-
-            
+            if (!System.IO.Directory.Exists("projects"))
+            {
+                System.IO.Directory.CreateDirectory("projects");
+            }
 
             var response = _client.GetAsync(path).Result;
 

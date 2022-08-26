@@ -1,4 +1,11 @@
-﻿using System;
+﻿/**------------------------------------------------------------------------
+ * ?                                ABOUT
+ * @repo           : AccrediTool
+ * @description    : This class contains static fucntions that are used to
+ *                 : create join tables within the API
+ *------------------------------------------------------------------------**/
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,6 +21,13 @@ namespace UoN.AccrediTool.Web.API
 {
     public static class Joiner
     {
+        /**========================================================================
+         **                           CourseToCourseList
+         *?  Creates a join table between a given course and courselist
+         *@param  course UoCourseModel
+         *@param  list UoCourseListModel
+         *@param  configuration IConfiguration
+         *========================================================================**/
         public static void CourseToCourseList(UoCourseModel course, UoCourseListModel list, IConfiguration configuration)
         {
             if(list != null && course != null)
@@ -33,7 +47,13 @@ namespace UoN.AccrediTool.Web.API
 
 
         }
-
+        /*---------------------------- END OF FUNCTION ----------------------------*/
+        /**========================================================================
+         **                           CourseToCourseList
+         *?  Creates a join table between a list of levels and courses
+         *@param  LevelCoursesJoins List<UoLevelCoursesJoin>
+         *@param  configuration IConfiguration
+         *========================================================================**/
         public static void CourseToCompToLevels(List<UoLevelCoursesJoin> LevelCoursesJoins, IConfiguration configuration)
         {
             if(LevelCoursesJoins != null)
@@ -55,8 +75,8 @@ namespace UoN.AccrediTool.Web.API
                 Console.ResetColor();
                 Console.WriteLine(new String("LevelCoursesJoins passed to joiner was null (CourseToCompToLevels)"));
             }
-
         }
+        /*---------------------------- END OF FUNCTION ----------------------------*/
 
     }
 }

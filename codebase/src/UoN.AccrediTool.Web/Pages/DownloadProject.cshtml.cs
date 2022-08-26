@@ -1,3 +1,9 @@
+/**------------------------------------------------------------------------
+ * ?                                ABOUT
+ * @repo           : AccrediTool
+ * @description    : This pagemodel provides a way for the user to download
+ *                 : a AccrediTool project
+ *------------------------------------------------------------------------**/
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,8 +51,6 @@ namespace UoN.AccrediTool.Web.Pages
         public IActionResult OnPost()
         {
             API.API.DownloadProject(projectId, _Configuration);
-
-
 
             return File(System.IO.File.ReadAllBytes("projects/" + projectId + ".zip") , MediaTypeNames.Application.Zip, "project-" + projectId + ".zip");
         }

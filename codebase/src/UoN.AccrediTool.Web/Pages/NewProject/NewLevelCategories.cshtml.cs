@@ -15,7 +15,7 @@ using UoN.AccrediTool.Core.Models;
 
 namespace UoN.AccrediTool.Web.Pages.NewProject
 {
-    //   [Authorize]
+    // [Authorize]
     public class NewLevelCategoriesModel : PageModel
     {
         [BindProperty(SupportsGet = true)]

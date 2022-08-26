@@ -17,7 +17,7 @@ using UoN.AccrediTool.Core.Repositories;
 
 namespace UoN.AccrediTool.Service.Controllers
 {
-    //[Authorize]
+    // [Authorize]
     [ApiController]
     [Route("api/courses")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]

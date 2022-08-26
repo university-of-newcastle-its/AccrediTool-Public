@@ -42,9 +42,12 @@
   <ItemGroup>
     <ProjectReference Include="..\UoN.AccrediTool.Core\UoN.AccrediTool.Core.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <Folder Include="Export\" />
   </ItemGroup>
 
+	<Target Name="Tailwind" BeforeTargets="Build">
+		<Exec Command="npm run tailwind:build"/>
+	</Target>
+	
 </Project>

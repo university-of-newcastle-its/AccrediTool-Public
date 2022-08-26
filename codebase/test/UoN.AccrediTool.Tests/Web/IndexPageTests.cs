@@ -14,12 +14,22 @@ namespace UoN.AccrediTool.Tests.Web
     [ExcludeFromCodeCoverage]
     public class IndexPageTests
     {
+        public static IConfiguration createConfig()
+        {
+            IConfigurationBuilder config = new ConfigurationBuilder();
+            config.AddJsonFile("appsettings.Development.json");
+            return config.Build();
+        }
+
+
+
         [Fact]
         public void IndexModelTest()
         {
-            var config = Mock.Of<IConfiguration>();
+            var config = createConfig();
             var pageModel = new IndexModel(config);
-            pageModel.OnGet();
+            
+           // pageModel.OnGet();
         }
     }
 }

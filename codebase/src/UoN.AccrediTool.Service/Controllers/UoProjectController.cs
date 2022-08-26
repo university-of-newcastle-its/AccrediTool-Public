@@ -12,10 +12,22 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Text;
+using System.Net.Http;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 
 using UoN.AccrediTool.Core.Data;
 using UoN.AccrediTool.Core.Models;
 using UoN.AccrediTool.Core.Repositories;
+using UoN.AccrediTool.Service.Models;
+
+//JSON.net
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace UoN.AccrediTool.Service.Controllers
 {
@@ -27,13 +39,15 @@ namespace UoN.AccrediTool.Service.Controllers
     {
         readonly string controllerName = "Project";
         private readonly ILogger<UoProjectController> _logger;
+        private readonly IConfiguration _configuration;
         private readonly DataContext _context;
         public IUoProjectRepository Repository { get; set; }
-        public UoProjectController(DataContext context, ILogger<UoProjectController> logger)
+        public UoProjectController(DataContext context, ILogger<UoProjectController> logger, IConfiguration configuration)
         {
             _context = context;
             _logger = logger;
             Repository = new UoProjectRepository(_context);
+            _configuration = configuration;
         }
 
         #region GET: api/projects
@@ -133,6 +147,18 @@ namespace UoN.AccrediTool.Service.Controllers
                 if (download)
                 {
                     var webClient = new WebClient();
+
+                    UoLoginModel loginModel = new();
+
+                    loginModel.Username = "service-user";
+                    loginModel.Secret = _configuration["Security:UserMappings:" + loginModel.Username + ":Secret"];
+
+                    webClient.Headers[HttpRequestHeader.ContentType] = "application/json";
+
+                    var response = webClient.UploadString(new Uri (host + "/api/security/login/"), JsonConvert.SerializeObject(loginModel).ToString());
+
+                    webClient.Headers[HttpRequestHeader.ContentType] = null;
+                    webClient.Headers["Authorization"] = "Bearer " + JsonConvert.DeserializeObject<JObject>(response).First.First.ToString();
 
                     if (Directory.Exists("./Export") == false)
                     {

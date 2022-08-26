@@ -161,7 +161,7 @@
     <form method="POST" enctype="multipart/form-data" asp-page-handler="submit" name="NewProjectForm">
         <div class="bg-white overflow-hidden shadow rounded-lg">
             <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
-                <h1>Create new project. Add project and Program Infomation</h1>
+                <h2>Create new project. Add project and Program Infomation</h2>
                 <hr>
                 <br>
                 @if(!Model.IsValid)
@@ -228,7 +228,7 @@
 
                                     @for(int i = 0; i < @Model.CampusModels.Count; i++)
                                     {
-                                        <option value ="@Model.CampusModels[0].CampusId">@Model.CampusModels[i].Name</option>
+                                        <option value ="@Model.CampusModels[i].CampusId">@Model.CampusModels[i].Name</option>
                                     }
 
                                 </select>

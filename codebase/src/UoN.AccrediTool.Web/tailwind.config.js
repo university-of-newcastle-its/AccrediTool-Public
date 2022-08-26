@@ -7,7 +7,7 @@ module.exports = {
         purgeLayersByDefault: true
     },
     content: [
-        './Views/**/*.cshtml'
+        './Pages/**/*.cshtml'
     ],
     theme: {
         extend: {
@@ -19,7 +19,6 @@ module.exports = {
             }
         }
     },
-    variants: {},
     plugins: [
     ]
 }

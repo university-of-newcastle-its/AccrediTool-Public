@@ -7,9 +7,10 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
 
-    let numOfCourseMappings = 0;
-    let assesmentCount = 0;
-    let learningOutcomeCount = 0;
+    var numOfCourseMappings = 0;
+    var assesmentCount = 0;
+    var assessmentExampleCount = 0;
+    var learningOutcomeCount = 0;
 
     function formValidation()
     {
@@ -29,19 +30,23 @@
         isValid = validateText("CourseModel_AcademicOrgId", isValid, "", "border border-red-500");
         isValid = validateText("CourseModel_FieldOfEducationId", isValid, "", "border border-red-500");
 
-        if(numOfCourseMappings == 0)
+        if(!(/[a-zA-Z][a-zA-Z][a-zA-Z][a-zA-Z]\d\d\d\d/.test(document.getElementById("CourseCode").value)))
         {
-            document.getElementById("Mapping_Header").className = "justify-start col-span-1";
-
-            document.getElementById("OneMappingRequried").className = "text-red-500 justify-start col-span-5";
-
             isValid = false;
-        }   
+
+            document.getElementById("CourseCode").className = textInvalidClass;
+        }
         else
         {
+           document.getElementById("CourseCode").className = textValidClass; 
+        }
+
+
+        if (numOfCourseMappings == 0) 
+        {
+
             document.getElementById("Mapping_Header").className = "justify-start col-span-6";
 
-            document.getElementById("OneMappingRequried").className = "hidden";
 
             for(let i = 0; i < numOfCourseMappings; i++)
             {
@@ -84,6 +89,32 @@
      
             }
 
+
+        }
+
+        //validate assessments
+        for(let i = 0; i < assesmentCount; i++)
+        {
+            isValid = validateText("assessmentModels[" + i + "].Name", isValid, "w-full h-full", "w-full h-full border border-red-500");
+            isValid = validateInteger("assessmentModels[" + i + "].Weight", isValid, "w-full h-full", "w-full h-full border border-red-500");
+        }
+
+        //validate assessment example
+        for(let i = 0; i < assessmentExampleCount; i++)
+        {
+            isValid = validateText("documents[" + i + "].Name",isValid , "border-l border-b col-span-3", "border-l border-b col-span-3 border border-red-500");
+
+            const urlREGEX = /https?:\/\/(www\.)?[-a-zA-Z0-9@@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()!@@:%_\+.~#?&\/\/=]*)/;
+
+            if(urlREGEX.test(document.getElementById("documents[" + i +"].URI").value))
+            {
+                document.getElementById("documents[" + i + "].URI").className = "border-l border-b col-span-4";
+            }
+            else
+            {
+                isValid= false
+                document.getElementById("documents[" + i + "].URI").className = "border-l border-b col-span-4 border border-red-500";
+            }
 
         }
 
@@ -275,36 +306,186 @@
     
     }
 
+
+    //---------------------------------------------------------------------------
+    // *                           removeSelectedAssessments
+    // ?  This function removes all the assessments that are selected, it won't
+    // ?  remove assessments that have examples added to them and will also redindex assessmnets
+    // ?  for example if we have ids 1,2,3 and 2 is removed it will change the remaining
+    // ?  to be 1, 2 so it can be posted to a list.
+    //---------------------------------------------------------------------------
     function removeSelectedAssessments()
     {
+        let assessmentsToRemove = [];
+
+        document.getElementById("AssessmentRemoveError").className = "hidden";
+
+        // remove assessments
         for(let i = 0; i < assesmentCount; i++ )
         {
             if(document.getElementById("Assessment_Selected_" + i) !=null)
             {
                 if(document.getElementById("Assessment_Selected_" + i).checked)
                 {
-                     document.getElementById("Assessment_Num_" + i).innerHTML = "<input type=\"hidden\" name=\"assessmentModels[" + i + "].Name\" id=\"assessmentModels[" + i + "].Name\" value=\"remove\">";
+                    let canRemove = true
+                    for (let j = 0; j < assessmentExampleCount; j++)
+                    {
+                        if(document.getElementById("documents[" + j + "].AssessmentId").value == i) // if doc linked to assessment
+                        {
+                            canRemove = false; // don't remove
+                            document.getElementById("AssessmentRemoveError").className = "text-red-500 font-bold";
+                        }
+                    }
+
+                    if(canRemove)
+                    {
+                        document.getElementById("Assessment_Num_" + i).outerHTML = "";
+                        assessmentsToRemove.push(i);
+                    }
+
                 }
     
             }
         }
-    }
 
-    function removeSelectedLearningOutcomes()
-    {
-        for(let i = 0; i < learningOutcomeCount; i++ )
+        // redo indexing
+        let index = 0;
+        for(let i = 0; i < assesmentCount; i++)
         {
-            if(document.getElementById("LearningOutcome_Selected_" + i) !=null)
-            {
-                if(document.getElementById("LearningOutcome_Selected_" + i).checked)
+            
+            let removed = false;
+            for(let j = 0; j < assessmentsToRemove.length; j++)
+            {  
+                if(assessmentsToRemove[j] == i)
                 {
-                     document.getElementById("LearningOutcome_Num_" + i).innerHTML = "<input type=\"hidden\" name=\"learningOutcomeModels[" + i + "].Name\" id=\"learningOutcomeModels[" + i + "].Name\" value=\"remove\">";
+                    removed = true;
                 }
-    
+            }
+
+            // if was not removed change index
+            if(!removed)
+            {
+                //change name
+                $(document.getElementById("Assessment_Selected_" + i)).prop("name", "Assessment_Selected_" + index);
+                $(document.getElementById("assessmentModels[" + i + "].Name")).prop("name", "assessmentModels[" + index + "].Name")
+                $(document.getElementById("assessmentModels[" + i + "].Weight")).prop("name", "assessmentModels[" + index + "].Weight")
+                $(document.getElementById("assessmentModels[" + i + "].AssessmentTypeId")).prop("name", "assessmentModels[" + index + "].AssessmentTypeId")
+                $(document.getElementById("assessmentModels[" + i + "].Position")).prop("name", "assessmentModels[" + index + "].Position")
+                $(document.getElementById("assessmentModels[" + i +"].Purpose")).prop("name", "assessmentModels[" + index +"].Purpose")
+                $(document.getElementById("assessmentModels[" + i +"].Description")).prop("name", "assessmentModels[" + index +"].Description")
+
+                //change value
+                $(document.getElementById("assessmentModels[" + i + "].Position")).prop("value", "index")
+                $(document.getElementById("Assessmnet_Num_Header_" + i)).html((index + 1) + ".")
+
+                //change onclick
+                document.getElementById("addAssessmentExampleButton-" + i).setAttribute("onclick", "addAssessmentExample(" + index + ", '', '', -1, '')" )
+
+                //change for 
+                $(document.getElementById("assessmentModels_Name_Label_" + i)).prop("for","assessmentModels[" + index + "].Name")
+                $(document.getElementById("assessmentModels_Weight_Label_" + i)).prop("for", "assessmentModels[" + index + "].Weight")
+                $(document.getElementById("assessmentModels_Purpose_Label_" + i)).prop("for", "assessmentModels[" + index + "].Purpose")
+                $(document.getElementById("assessmentModels_Description_Label_" + i)).prop("for", "assessmentModels[" + index + "].Description")
+
+                // change ids
+                $(document.getElementById("Assessment_Num_" + i)).prop("id", "Assessment_Num_" + index);
+                $(document.getElementById("Assessment_Selected_" + i)).prop("id", "Assessment_Selected_" + index);
+                $(document.getElementById("assessmentModels[" + i + "].Name")).prop("id", "assessmentModels[" + index + "].Name")
+                $(document.getElementById("assessmentModels[" + i + "].Weight")).prop("id", "assessmentModels[" + index + "].Weight")
+                $(document.getElementById("assessmentModels[" + i + "].AssessmentTypeId")).prop("id", "assessmentModels[" + index + "].AssessmentTypeId")
+                $(document.getElementById("assessmentModels[" + i + "].Position")).prop("id", "assessmentModels[" + index + "].Position")
+                $(document.getElementById("addAssessmentExampleButton-" + i)).prop("id","addAssessmentExampleButton-" + index)
+                $(document.getElementById("Assessmnet_Num_Header_" + i)).prop("id", "Assessmnet_Num_Header_" + index)
+                $(document.getElementById("assessmentModels[" + i +"].Purpose")).prop("id", "assessmentModels[" + index +"].Purpose")
+                $(document.getElementById("assessmentModels[" + i +"].Description")).prop("id", "assessmentModels[" + index +"].Description")
+                $(document.getElementById("assessmentModels_Name_Label_" + i)).prop("id", "assessmentModels_Name_Label_" + index)
+                $(document.getElementById("assessmentModels_Weight_Label_" + i)).prop("id", "assessmentModels_Weight_Label_" + index)
+                $(document.getElementById("assessmentModels_Purpose_Label_" + i)).prop("id", "assessmentModels_Purpose_Label_" + index)
+                $(document.getElementById("assessmentModels_Description_Label_" + i)).prop("id", "assessmentModels_Description_Label_" + index)
+                //re index examples
+
+                for (let j = 0; j < assessmentExampleCount; j++) // for each assessment example
+                {
+                    if(document.getElementById("documents["+ j +"].AssessmentId").value == i) // if linked to current assessment being reindexed
+                    {
+                        document.getElementById("documents[" + j + "].AssessmentId").value = index;
+                    }
+                }
+                index++;
             }
         }
-    }
+        
+        
 
+
+        
+        //decrement assessmentCount
+        assesmentCount = index;
+    }
+    //============================= END OF removeSelectedAssessments ==============================
+    //---------------------------------------------------------------------------
+    // *                           removeSelectedLearningOutcomes
+    // ?  This function removes all the learningoutcomes that are selected.
+    // ?  It will also reindex the remaining outcomes
+    //---------------------------------------------------------------------------
+    function removeSelectedLearningOutcomes() 
+    {
+        let learingOutcomesToRemove = []
+
+        // remove selected learing outcomes
+        for (let i = 0; i < learningOutcomeCount; i++) {
+            if (document.getElementById("LearningOutcome_Selected_" + i) != null) {
+                if (document.getElementById("LearningOutcome_Selected_" + i).checked) {
+                    document.getElementById("LearningOutcome_Num_" + i).outerHTML = "";
+                    learingOutcomesToRemove.push(i);
+                }
+
+            }
+        }
+
+          //redo indexing
+        let index = 0;
+
+        for (let i = 0; i < learningOutcomeCount; i++)
+        {
+            let removed = false
+            for(let j = 0; j < learingOutcomesToRemove.length; j++)
+            {
+                if (learingOutcomesToRemove[j] == i) 
+                {
+                    removed = true
+                }
+            }
+
+            //if not removed
+            if(!removed)
+            {
+                //change names
+                $(document.getElementById("learningOutcomeModels["+ i + "].Name")).prop("name", "learningOutcomeModels["+ index + "].Name")
+                $(document.getElementById("learningOutcomeModels["+ i + "].Position")).prop("name", "learningOutcomeModels["+ index + "].Position")
+
+                //change values
+                $(document.getElementById("learningOutcomeModels["+ i + "].Position")).prop("value", index + 1)
+
+
+                $(document.getElementById("learningOutcome_Num_Display_" + i)).html((index + 1 + "."))
+
+                //change ids
+                $(document.getElementById("LearningOutcome_Num_" + i)).prop("id", "LearningOutcome_Num_" + index )
+                $(document.getElementById("LearningOutcome_Selected_" + i)).prop("id", "LearningOutcome_Selected_" + index )
+                $(document.getElementById("learningOutcomeModels["+ i + "].Name")).prop("id", "learningOutcomeModels["+ index + "].Name")
+                $(document.getElementById("learningOutcomeModels["+ i + "].Position")).prop("id", "learningOutcomeModels["+ index + "].Position")
+                $(document.getElementById("learningOutcome_Num_Display_" + i)).prop("id", "learningOutcome_Num_Display_" + index)
+
+                index++;
+
+            }
+        }
+
+        learningOutcomeCount = index;
+      
+    }
+    //============================= END OF removeSelectedLearningOutcomes ==============================
 
     function getFieldOfEdu()
     {
@@ -383,51 +564,119 @@
         });
 
     }
-
-    function addAssessment()
+    //---------------------------------------------------------------------------
+    // *                           addAssessment
+    // ?  This function inserts part of the form needed to add a new assessment,
+    // ?  this is done via JQuerry DOM. assessmentCount is also incremented
+    //---------------------------------------------------------------------------
+    function addAssessment(name, weight, type, purpose, description )
     {
-        $.ajax({
-            type: "POST",
-            url: "AddCourse?handler=AddAssessment",
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader("XSRF-TOKEN",
-                    $('input:hidden[name="__RequestVerificationToken"]').val());
-            },
-            data: JSON.stringify({
-                    num: assesmentCount
-                }),
-            contentType: "application/json; charset=utf-8",
-            dataType: "html",
-            success: function(response){
-                    insertResponse(response, "Assessments");
+        if(type == -1)
+        {
+            @if(@Model.AssessmentTypeModels != null)
+            {
+                @if(@Model.AssessmentTypeModels.Count > 1)
+                {
+                    @Html.Raw("type = " + @Model.AssessmentTypeModels[1].AssessmentTypeId);
+                }
+                else if(@Model.AssessmentTypeModels.Count > 0)
+                {
+                    @Html.Raw("type = " + @Model.AssessmentTypeModels[0].AssessmentTypeId);
+                }
             }
-        });
-        
+        }
+
+
+        //create div to be inserted
+        var assessment = $("<div>", {"id": "Assessment_Num_" + assesmentCount, "class": "flex flex-row border-collapse"}).append(
+            $("<div>" , {"class": "col-span-1 p-2 border basis-16 relative"}).append(
+                $("<div>", {"class": "grid grid-cols-2 place-self-center"}).append(
+                    $("<input>" , { "type": "checkbox", "id": "Assessment_Selected_" + assesmentCount, "name" : "Assessment_Selected_" + assesmentCount }),
+                    $("<h3>", {"class": "pl-2", "id": "Assessmnet_Num_Header_" + assesmentCount}).append(assesmentCount+1 + ".")
+                ),
+            ),
+
+            $("<div>", {"id": "Assessment_Num_FormData_" + assesmentCount, "class": "grid grid-cols-8 basis-full"}).append(
+                $("<div>" ,{"class": "col-span-4 h-12"}).append(
+                    $("<div>", {"class" : "border align-middle w-full h-full relative"}).append(
+                        $("<input>", {"value" : name ,"type" : "text", "id": "assessmentModels[" + assesmentCount +"].Name", "name" : "assessmentModels[" + assesmentCount +"].Name",  "class" : "peer w-full h-full placeholder-transparent", "placeholder" : "Name"}),
+                        $("<label>", {"id": "assessmentModels_Name_Label_" + assesmentCount, "for": "assessmentModels[" + assesmentCount +"].Name", "class": "absolute w-full h-full transition-all text-gray-500 text-xs -top-0.5 left-0 peer-placeholder-shown:text-base peer-placeholder-shown:pt-2 peer-placeholder-shown:pl-1 peer-placeholder-shown:left-0 peer-placeholder-shown:inset-y-0"}).append("Assessment Name")
+                    )             
+                ),
+                $("<div>", {"class" : "border align-middle relative"}).append(
+                    $("<input>", {"value" : weight ,"type" : "text", "name" : "assessmentModels[" + assesmentCount + "].Weight", "id" : "assessmentModels[" + assesmentCount + "].Weight", "class" : "peer placeholder-transparent w-full h-full", "placeholder" : "Weight"}),
+                    $("<label>", {"id": "assessmentModels_Weight_Label_" + assesmentCount, "for": "assessmentModels[" + assesmentCount +"].Weight", "class": "absolute w-full h-full transition-all text-gray-500 text-xs -top-0.5 left-0 peer-placeholder-shown:text-base peer-placeholder-shown:pt-2 peer-placeholder-shown:pl-1 peer-placeholder-shown:left-0 peer-placeholder-shown:inset-y-0"}).append("Weight")
+                ),
+                $("<div>" , {"class" : "col-span-2 border align-middle"}).append(
+                    $("<select>", { "name": "assessmentModels[" + assesmentCount +"].AssessmentTypeId", "id" : "assessmentModels[" + assesmentCount +"].AssessmentTypeId", "class" : "w-full h-full"}).append(
+                        $("<optgroup>", {"label": "Assessment Type"}),
+                        @if(@Model.AssessmentTypeModels != null)
+                        {
+                            @for (int i = 1; i < @Model.AssessmentTypeModels.Count; i++)
+                            {
+                                @Html.Raw("$(\"<option>\", {\"value\" : \"" + @Model.AssessmentTypeModels[i].AssessmentTypeId + "\"}).append(\"" + @Model.AssessmentTypeModels[i].Name + "\"), \n");
+                            }
+                            @if(Model.AssessmentTypeModels.Count >= 0)
+                            {
+                                @Html.Raw("$(\"<option>\", {\"value\" : \"" + @Model.AssessmentTypeModels[0].AssessmentTypeId + "\"}).append(\"" + @Model.AssessmentTypeModels[0].Name + "\") \n");
+                            }
+
+                            
+
+                        }   
+                    )
+                ),
+                $("<div>" , {"class" : "border align-middle"}).append(
+                    $("<button>", {"class" : "w-full h-full", "type" : "button", "onclick" : "addAssessmentExample(" + assesmentCount + ", '', '', -1, '')", "id" : "addAssessmentExampleButton-" + assesmentCount}).append("Add Example")
+                ),
+                $("<input>", {"type" : "hidden", "value" : assesmentCount, "name" : "assessmentModels["+ assesmentCount +"].Position", "id" : "assessmentModels["+ assesmentCount +"].Position"})
+            ).append(
+                $("<div>", {"class" : "col-span-8 w-full h-24"}).append(
+                    $("<div>", {"class" : "h-1/2 w-full relative"}).append(
+                        $("<input>", {"value" : purpose, "id": "assessmentModels[" + assesmentCount +"].Purpose" , "name": "assessmentModels[" + assesmentCount +"].Purpose", "class" : "peer h-full w-full border placeholder-transparent", "placeholder": "Purpose"}),
+                        $("<label>", {"id": "assessmentModels_Purpose_Label_" + assesmentCount, "for": "assessmentModels[" + assesmentCount +"].Purpose", "class": "absolute w-full h-full transition-all text-gray-500 text-xs -top-0.5 left-0 peer-placeholder-shown:text-base peer-placeholder-shown:pt-2 peer-placeholder-shown:pl-1 peer-placeholder-shown:left-0 peer-placeholder-shown:inset-y-0"}).append("Purpose")
+                    ),
+                    $("<div>", {"class" : "h-1/2 w-full relative"}).append(
+                        $("<input>", {"value" : description, "id": "assessmentModels[" + assesmentCount +"].Description", "name" : "assessmentModels[" + assesmentCount +"].Description", "class" : "peer h-full w-full border placeholder-transparent", "placeholder" : "Description"}),
+                        $("<label>", {"id": "assessmentModels_Description_Label_" + assesmentCount, "for": "assessmentModels[" + assesmentCount +"].Description", "class": "absolute w-full h-full transition-all text-gray-500 text-xs -top-0.5 left-0 peer-placeholder-shown:text-base peer-placeholder-shown:pt-2 peer-placeholder-shown:pl-1 peer-placeholder-shown:left-0 peer-placeholder-shown:inset-y-0"}).append("Description")
+                    )
+                )
+
+            )
+        )
+        assessment.find('select').val(type)
+        // insert html
+        $("#Assessments").append(assessment)
+                                      
         assesmentCount++;
     }
+    //============================= END OF addAssessment ==============================
 
-    function addLearningOutcome()
+    //---------------------------------------------------------------------------
+    // *                           addLearningOutcome
+    // ?  This function inserts part of the form needed to add a new learning outcome,
+    // ?  this is done via JQuerry DOM. learningOutcomeCount is also incremented.
+    //---------------------------------------------------------------------------
+    function addLearningOutcome(name)
     {
-        $.ajax({
-            type: "POST",
-            url: "AddCourse?handler=AddLearningOutcome",
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader("XSRF-TOKEN",
-                    $('input:hidden[name="__RequestVerificationToken"]').val());
-            },
-            data: JSON.stringify({
-                    num: learningOutcomeCount
-                }),
-            contentType: "application/json; charset=utf-8",
-            dataType: "html",
-            success: function(response){
-                    insertResponse(response, "LearningOutcomes");
-            }
-        });
-        
+        var learningOutcome = $("<div>", {"class" : "grid grid-cols-10", "id" : "LearningOutcome_Num_" + learningOutcomeCount}).append(
+            $("<div>", {"class" : "col-span-1 p-2 border-r border-l border-b grid grid-cols-2"}).append(
+                $("<input>", {"type" : "checkbox", "id" : "LearningOutcome_Selected_" + learningOutcomeCount}),
+                $("<h3>", {"id" : "learningOutcome_Num_Display_" + learningOutcomeCount}).append((learningOutcomeCount+1) + ".")
+            ),
+            
+            $("<div>", {"class" : "col-span-9 border-b border-r align-middle w-full h-full"}).append(
+                $("<input>", {"value": name,  "type" : "text", "name" : "learningOutcomeModels["+ learningOutcomeCount + "].Name", "id": "learningOutcomeModels["+ learningOutcomeCount + "].Name", "class" : "w-full h-full"})
+            ),
+
+            $("<input>", {"type" : "hidden", "value" : learningOutcomeCount+1, "name" : "learningOutcomeModels["+ learningOutcomeCount +"].Position", "id": "learningOutcomeModels["+ learningOutcomeCount +"].Position"})
+        )
+
+        $("#LearningOutcomes").append(learningOutcome)
+ 
         learningOutcomeCount++;
     }
-
+    //============================= END OF addLearningOutcome ==============================
     function addMapping()
     {
             $.ajax({
@@ -562,8 +811,128 @@
         }
     }
 
+    //---------------------------------------------------------------------------
+    // *                           addAssessmentExample
+    // ?  This function inserts the form elements needed to add a document example 
+    // ?  into the form. It populates a <List<documents>> where the first list
+    // ?  index matches the assessment.
+    // param assessmentNumber int
+    //---------------------------------------------------------------------------
+    function addAssessmentExample(assessmentNumber, uri, name, type, grade)
+    {
+
+        
+
+        var example = document.createElement("div");
+        example.className = "grid col-span-8 grid-cols-10 w-full h-full";
+
+        example.id = "assessment-example-" + assessmentExampleCount
+
+        var innerHTML = "   <input value=\"" + uri + "\" id=\"documents["+ assessmentExampleCount +"].URI\" name=\"documents["+ assessmentExampleCount +"].URI\" class=\"border-l border-b col-span-4\" type=\"text\" placeholder=\"URL\" /> \n";
+        innerHTML += "       <input value=\"" + name + "\" id=\"documents["+ assessmentExampleCount +"].Name\" name=\"documents["+ assessmentExampleCount +"].Name\" class=\"border-l border-b col-span-3\" type=\"text\" placeholder=\"Name\"/> \n";        
+        innerHTML += "       <select id=\"documents["+ assessmentExampleCount +"].Type\" name=\"documents["+ assessmentExampleCount +"].Type\" class=\"col-span-2\"> \n";       
+        innerHTML += "           <option value=\"-1\" disabled selected>Select Example Type</option> \n";        
+        innerHTML += "           <option value=\"WorkSample\">Work Sample</option> \n";        
+        innerHTML += "           <option value=\"AssessmentItem\">Assessment Item</option> \n";        
+        innerHTML += "           <option value=\"MarkingRubric\">Marking Rubric</option> \n";                
+        innerHTML += "       </select> \n";
+        innerHTML += "      <div class=\"grid grid-cols-2 w-full h-full\">";
+        innerHTML += "          <select id=\"documents["+ assessmentExampleCount +"].Grade\" name=\"documents["+ assessmentExampleCount +"].Grade\" class=\"\"> \n";
+        innerHTML += "              <option value=\"\">N/A</option> \n";      
+        innerHTML += "              <option value=\"HD\">HD</option> \n";        
+        innerHTML += "              <option value=\"D\">D</option> \n";        
+        innerHTML += "              <option value=\"C\">C</option> \n";
+        innerHTML += "              <option value=\"P\">P</option> \n";       
+        innerHTML += "              <option value=\"FF\">FF</option> \n";        
+        innerHTML += "          </select> \n";
+        innerHTML += "          <button type=\"button\" class=\"w-full grid place-items-center border-r border-b cursor-pointer\" id=\"removeAssessmentExampleButton-"+assessmentExampleCount+"\" onclick=\"removeAssessmentExample(" + assessmentExampleCount +")\"> \n" 
+        innerHTML += "              <img src=\"/img/SVG/x-circle.svg\"/> \n" 
+        innerHTML += "          </button> \n"     
+        innerHTML += "      </div>";
+        innerHTML += "  <input type=\"hidden\" id=\"documents["+ assessmentExampleCount +"].AssessmentId\" name=\"documents["+ assessmentExampleCount +"].AssessmentId\" value=\""+ assessmentNumber +"\"/>"
+            
+        example.innerHTML = innerHTML;
+
+        $($(example).find('select')[0]).val(type)
+        $($(example).find('select')[1]).val(grade)
+
+        
+        var assessmentDoc = document.getElementById("Assessment_Num_FormData_" + assessmentNumber);
+
+        assessmentDoc.insertAdjacentElement("beforeend", example);
+
+         assessmentExampleCount++;
+    }
+    //============================= END OF addAssessmentExample ==============================
+
+    //---------------------------------------------------------------------------
+    // *                           removeAssessmentExample
+    // ?  This function removes an assessment example and then re-indexs the remaining examples.
+    // param assessmentExampleNumber int
+    //---------------------------------------------------------------------------
+    function removeAssessmentExample(assessmentExampleNumber)
+    {
+        document.getElementById("assessment-example-" + assessmentExampleNumber).outerHTML = ""; // remove example
+
+        
+        // re index
+        for(let i = assessmentExampleNumber + 1; i < assessmentExampleCount; i++) // for all examples with index above the removed index
+        {
+            //change name
+            $(document.getElementById("documents["+ (i) + "].URI")).prop("name", "documents["+ (i-1) + "].URI")
+            $(document.getElementById("documents["+ (i) + "].Name")).prop("name", "documents["+ (i-1) + "].Name")
+            $(document.getElementById("documents["+ (i) + "].Type")).prop("name", "documents["+ (i-1) + "].Type")
+            $(document.getElementById("documents["+ (i) + "].Grade")).prop("name", "documents["+ (i-1) + "].Grade")
+            $(document.getElementById("documents["+ (i) + "].AssessmentId")).prop("name", "documents["+ (i-1) + "].AssessmentId")    
+
+            //change onclicks
+            document.getElementById("removeAssessmentExampleButton-" + i).setAttribute("onclick", "removeAssessmentExample(" + (i-1) +")")
+
+            //change ids
+            $(document.getElementById("assessment-example-" + i)).prop("id", "assessment-example-" + (i-1))
+            $(document.getElementById("documents["+ (i) + "].URI")).prop("id", "documents["+ (i-1) + "].URI")
+            $(document.getElementById("documents["+ (i) + "].Name")).prop("id", "documents["+ (i-1) + "].Name")
+            $(document.getElementById("documents["+ (i) + "].Type")).prop("id", "documents["+ (i-1) + "].Type")
+            $(document.getElementById("documents["+ (i) + "].Grade")).prop("id", "documents["+ (i-1) + "].Grade")
+            $(document.getElementById("documents["+ (i) + "].AssessmentId")).prop("id", "documents["+ (i-1) + "].AssessmentId")    
+            $(document.getElementById("removeAssessmentExampleButton-" + i)).prop("id", "removeAssessmentExampleButton-" + (i-1))
+            
+
+        }
+
+        assessmentExampleCount--;
+
+    }
+
     $(document).ready(function(){
         getMapping()
+        getFieldOfEdu()
+        getAcademicOrg()
+
+        @if(Model.loadCourse)
+        {
+            @if(Model.CourseModel.CourseInstances != null)
+            {
+                @for(int i = 0; i < Model.CourseModel.CourseInstances[0].Assessments.Count; i++)
+                {
+                    @Html.Raw("addAssessment(\"" +  Model.CourseModel.CourseInstances[0].Assessments[i].Name + "\" ,\"" + Model.CourseModel.CourseInstances[0].Assessments[i].Weight + "\" ,\""+ Model.CourseModel.CourseInstances[0].Assessments[i].AssessmentType.AssessmentTypeId + "\" ,\"" + Model.CourseModel.CourseInstances[0].Assessments[i].Purpose + "\" ,\"" + Model.CourseModel.CourseInstances[0].Assessments[i].Description + "\") \n");
+
+                    @for(int j = 0; j < Model.CourseModel.CourseInstances[0].Assessments[i].Documents.Count; j++)
+                    {
+                        @Html.Raw("addAssessmentExample(" + i +", \"" + Model.CourseModel.CourseInstances[0].Assessments[i].Documents[j].URI + "\", \"" + Model.CourseModel.CourseInstances[0].Assessments[i].Documents[j].Name + "\", \"" + Model.CourseModel.CourseInstances[0].Assessments[i].Documents[j].Type + "\", \"" + Model.CourseModel.CourseInstances[0].Assessments[i].Documents[j].Grade + "\") \n")
+                    }
+
+                }
+
+                @for(int i = 0; i < Model.CourseModel.CourseInstances[0].LearningOutcomes.Count; i++)
+                {
+                    @Html.Raw("addLearningOutcome(\"" + Model.CourseModel.CourseInstances[0].LearningOutcomes[i].Name +"\") \n")
+                }
+
+            }
+        }
+
+
 
     });
 
@@ -585,10 +954,7 @@
     <div class="bg-white overflow-hidden shadow rounded-lg">
         <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
 
-
-            <br>
-
-        
+            <br>        
 
             <div class="grid grid-cols-2 gap-x-6 gap-y-2">
                 
@@ -633,26 +999,17 @@
                     }
                     else
                     {
-                    <option value="">Field Of Education</option>
+                        <option value="">Field Of Education</option>
                     }
 
                 </select>
             </div>
-
-            
-
-
-                
-            
-
-
         </div>
     </div>
     <br>
     <div class="bg-white overflow-hidden shadow rounded-lg">
         <div class="border-b border-gray-200 px-4 py-5 sm:px-6 grid grid-cols-10 gap-x-24 gap-y-2">
             <h2 class="justify-start col-span-6" id="Mapping_Header"> Mapping </h2>
-            <b class="hidden" id="OneMappingRequried">At least one course mapping is required</b>
             <b class="hidden" id="InvalidMapping">Invalid Course Mapping: Courses must have Taught, Practiced or Assessed asgined to them.</b>
 
             <div class="col-span-4 grid grid-cols-10 gap-x-6">
@@ -687,61 +1044,21 @@
             <div class="grid grid-cols-2">
                 <h3>Assessments</h3>
                 <div class="grid grid-cols-10 gap-x-4">
-                    <h3 class="justify-end cursor-pointer border border-gray-400 hover:border-sky-700 uppercase rounded-lg px-3 bg-gray-200 align-middle text-center col-span-4" onclick="addAssessment()">Add Assesment</h3>
+                    <h3 class="justify-end cursor-pointer border border-gray-400 hover:border-sky-700 uppercase rounded-lg px-3 bg-gray-200 align-middle text-center col-span-4" onclick="addAssessment('', '', -1, '', '')">Add Assesment</h3>
                     <h3 class="justify-end cursor-pointer border border-gray-400 hover:border-sky-700 uppercase rounded-lg px-3 bg-gray-200 align-middle text-center col-span-6" onclick="removeSelectedAssessments()">Remove Selected Assesments</h3>
                 </div>
             </div>
 
         </div>
 
+        <div class="hidden" id="AssessmentRemoveError">
+            <p>Not all assessments could be removed, please remove documents attached first.</p>
+        </div>
+
         <div class="border-b border-gray-200 px-4 py-3 sm:px-6">
 
             <div id="Assessments">
-                <div class="grid grid-cols-9 w-90 h-12 border-b border-gray-200 bg-gray-50">
-                    <h3 class="px-6 py-3 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider col-span-3 bg-gray-50 align-middle">Assessment Name</h3>
-                    <h3 class="px-6 py-3 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider col-span-3 bg-gray-50 align-middle">Weight</h3>
-                    <h3 class="px-6 py-3 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider col-span-3 bg-gray-50 align-middle">Assessment Type</h3>
-                </div>
 
-                @if(Model.loadCourse)
-                {
-                    if(Model.CourseModel.CourseInstances != null)
-                    {
-                        for(int i = 0; i < Model.CourseModel.CourseInstances[0].Assessments.Count; i++)
-                        {
-                            
-                            <div class="grid grid-cols-3" id="Assessment_Num_@i">
-                                <div class="grid grid-cols-10" >
-                                        <div class="col-span-1 p-2 border-r border-l border-b">
-                                            <input type="checkbox" id="Assessment_Selected_@i">
-                                        </div>
-
-                                        <div class="col-span-9 border-b align-middle w-full h-full">
-                                            <input type="text" name="assessmentModels[@i].Name" id="assessmentModels[@i].Name" class="w-full h-full" value="@Model.CourseModel.CourseInstances[0].Assessments[i].Name">
-                                        </div>
-                                    
-                                </div >
-
-                                <div class="border-l border-b align-middle ">
-                                    <input type="text" name="assessmentModels[@i].Weight" id="assessmentModels[@i].Weight" class="w-full h-full" value="@Model.CourseModel.CourseInstances[0].Assessments[i].Weight">
-                                </div>
-
-                                <div class="border-l border-b border-r align-middle">
-                                    <select name="assessmentModels[@i].AssessmentTypeId" id="assessmentModels[@i].AssessmentTypeId" class="w-full h-full"> 
-                                        <option value="@Model.CourseModel.CourseInstances[0].Assessments[i].AssessmentType.AssessmentTypeId">@Model.CourseModel.CourseInstances[0].Assessments[i].AssessmentType.Name</option>
-                                        @for(int j = 0; j < Model.AssessmentTypeModels.Count; j++)
-                                        {
-                                            <option value="@Model.AssessmentTypeModels[j].AssessmentTypeId">@Model.AssessmentTypeModels[j].Name</option>
-                                        }
-                                    </select>
-                                </div>
-
-                                <input type="hidden" value="@(i+1)" name="assessmentModels[@i].Position"  id="assessmentModels[@i].Position">
-                            </div>
-                            @(Model.NumOfAssessments = i)
-                        }
-                    }
-                }
             </div>
 
         </div>
@@ -753,7 +1070,7 @@
             <div class="grid grid-cols-3">
                 <h3>Learning Outcomes</h3>
                 <div class="grid grid-cols-10 gap-x-4 col-span-2">
-                    <h3 class="justify-end cursor-pointer border border-gray-400 hover:border-sky-700 uppercase rounded-lg px-3 bg-gray-200 align-middle text-center col-span-4" onclick="addLearningOutcome()">Add Learning Outcomes</h3>
+                    <h3 class="justify-end cursor-pointer border border-gray-400 hover:border-sky-700 uppercase rounded-lg px-3 bg-gray-200 align-middle text-center col-span-4" onclick="addLearningOutcome('')">Add Learning Outcomes</h3>
                     <h3 class="justify-end cursor-pointer border border-gray-400 hover:border-sky-700 uppercase rounded-lg px-3 bg-gray-200 align-middle text-center col-span-6" onclick="removeSelectedLearningOutcomes()">Remove Selected Learning Outcomes</h3>
                 </div>
             </div>
@@ -767,35 +1084,7 @@
                     <h3 class="px-6 py-3 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider col-span-1 bg-gray-50 align-middle">Learning Outcomes</h3>
                 </div>
 
-                @if(Model.loadCourse)
-                {
-                    if(Model.CourseModel.CourseInstances != null)
-                    {
-                        for(int i = 0; i < Model.CourseModel.CourseInstances[0].LearningOutcomes.Count; i++)
-                        {
-                            <div class="grid grid-cols-10" id="LearningOutcome_Num_@i">
-                                <div class="col-span-1 p-2 border-r border-l border-b grid grid-cols-2">
-                                    <input type="checkbox" id="LearningOutcome_Selected_@i">
-                                </div>
-
-                                <div class="col-span-9 border-b border-r align-middle w-full h-full">
-                                    <input type="text" name="learningOutcomeModels[@i].Name" id="learningOutcomeModels[@i].Name" value="@Model.CourseModel.CourseInstances[0].LearningOutcomes[@i].Name" class="w-full h-full">
-                                </div>
-
-                                <input type="hidden" value="@(i+1)" name="learningOutcomeModels[@i].Position"  id="learningOutcomeModels[@i].Position">
-                            </div>
-                            @(Model.NumOfLearningOutcome = i)
-                        }
-
-                    }
-
-                }
-
-
             </div>
-
-
-
         </div>
 
     </div>
@@ -810,3 +1099,4 @@
     </form>
 
 </section>
+
